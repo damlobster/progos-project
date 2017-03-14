@@ -6,7 +6,7 @@
 
 int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
-    M_REQUIRE_NON_NULL(u);
+    //M_REQUIRE_NON_NULL(u);
 
     memset(u, 0, sizeof (*u));
 
