@@ -1,24 +1,15 @@
-CFLAGS = -c99
-CFLAGS += -g
-CFLAGS += -W
-CFLAGS += -Wall
-CFLAGS += -ansi
-CFLAGS += -pedantic
+CC = clang
+CFLAGS = -std=c11 -g -Wall -pedantic -Wextra
+LDFLAGS =
+SOURCES = error.c mount.c sector.c test-core.c test-inodes.c
+OBJECTS = $(SOURCES:.c=.o)
+EXECUTABLE = test-core
 
-
-all: test-inodes
-
-test-inodes: test-core.o error.o test-inodes.o
-	gcc test-core.o error.o test-inodes.o
-
-error.o: error.c
-	gcc -c -o error.o error.c
-
-test-core.o: test-core.c
-	gcc -c -o test-core.o test-core.c
-
-test-inodes.o: test-inodes.c
-	gcc -c -o test-inodes.o test-inodes.c
+all: $(SOURCES) $(EXECUTABLE)
+	
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 clean:
-	rm -rf *.o
+	rm -rf *.o test-core
+	

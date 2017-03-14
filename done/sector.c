@@ -18,19 +18,19 @@
  * @return 0 on success; <0 on error
  */
 int sector_read(FILE *f, uint32_t sector, void *data) {
-	M_REQUIRE_NON_NULL(f);
-	M_REQUIRE_NON_NULL(data);
-	if (0 == sector || sector > 63)
-		return ERR_BAD_PARAMETER;
+    M_REQUIRE_NON_NULL(f);
+    M_REQUIRE_NON_NULL(data);
+    if (0 == sector || sector > 63)
+        return ERR_BAD_PARAMETER;
 
-	if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
-		return ERR_IO;
-	}
+    if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
+        return ERR_IO;
+    }
 
-	if (fread(&data, SECTOR_SIZE, f) != SECTOR_SIZE) {
-		return ERR_IO;
-	}
+    if (fread(&data, sizeof (uint8_t), SECTOR_SIZE, f) != SECTOR_SIZE) {
+        return ERR_IO;
+    }
 
-	return 0;
+    return 0;
 }
 
