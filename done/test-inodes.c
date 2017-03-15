@@ -5,7 +5,9 @@
  *      Author: damien
  */
 
+#include "inode.h"
+
 int test(struct unix_filesystem *u){
-	return 0;
+	return inode_scan_print(u);
 }
 
