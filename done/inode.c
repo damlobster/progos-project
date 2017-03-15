@@ -18,7 +18,9 @@ int inode_scan_print(const struct unix_filesystem *u) {
 
 	for (int i = u->s.s_inode_start; i < u->s.s_isize; i++) {
 		const struct inode inodes[INODES_PER_SECTOR];
-		sector_read(u->f, i, &inodes);
+		int r = sector_read(u->f, i, &inodes);
+
+		if(r<0) return r;
 
 		for (int j = 0; j < INODES_PER_SECTOR; j++) {
 			if (inodes[i].i_mode & IALLOC) {
