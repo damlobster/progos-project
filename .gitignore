@@ -1,2 +1,6 @@
-/.cproject
-/.project
+.cproject
+.project
+nbproject/
+.settings/
+*.o
+test-core
