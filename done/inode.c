@@ -91,3 +91,38 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
     return 0;
 }
 
+/**
+ * @brief identify the sector that corresponds to a given portion of a file
+ * @param u the filesystem (IN)
+ * @param inode the inode (IN)
+ * @param file_sec_off the offset within the file (in sector-size units)
+ * @return >0: the sector on disk;  0: unallocated;  <0 error
+ */
+int inode_findsector(const struct unix_filesystem *u, const struct inode *i, int32_t file_sec_off) {
+    M_REQUIRE_NON_NULL(u);
+    M_REQUIRE_NON_NULL(i);
+    if (!(i->i_mode & IALLOC)) {
+        return ERR_UNALLOCATED_INODE;
+    }
+
+    int32_t size = (inode_getsize(i) / SECTOR_SIZE) + 1;
+
+    if (file_sec_off > size) {
+        return ERR_OFFSET_OUT_OF_RANGE;
+    } else if (size <= 8) {
+        //direct addressing
+        return i->i_addr[file_sec_off];
+    } else if (size < 7 * ADDRESSES_PER_SECTOR) {
+        // indirect addressing
+        int16_t addrs[ADDRESSES_PER_SECTOR];
+        int err = sector_read(u->f, i->i_addr[file_sec_off / ADDRESSES_PER_SECTOR], addrs);
+        if (err != 0) {
+            return err;
+        }
+        return addrs[file_sec_off % ADDRESSES_PER_SECTOR];
+    } else {
+        // extra-large file, not handled
+        return ERR_FILE_TOO_LARGE;
+    }
+}
+

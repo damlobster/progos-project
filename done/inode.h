@@ -26,8 +26,7 @@ extern "C" {
  * @param inode the inode
  * @return the size of the file
  */
-static inline int32_t inode_getsize(const struct inode *inode)
-{
+static inline int32_t inode_getsize(const struct inode *inode) {
     return ((inode->i_size0 << 16) | inode->i_size1);
 }
 
@@ -45,8 +44,7 @@ static inline int32_t inode_getsize(const struct inode *inode)
  * @param inode the inode
  * @return the size to store sector-read data plus one extra null char.
  */
-static inline int32_t inode_getsectorsize(const struct inode *inode)
-{
+static inline int32_t inode_getsectorsize(const struct inode *inode) {
     const int32_t i_size = inode_getsize(inode);
     return (i_size ? ((i_size - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE + 1 : 1);
 }
