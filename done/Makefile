@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -std=c11 -g -Wall -pedantic -Wextra
 LDFLAGS =
-SOURCES = error.c mount.c sector.c inode.c test-core.c test-inodes.c
+SOURCES = error.c mount.c sector.c inode.c test-core.c test-file.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = test-inodes
 
