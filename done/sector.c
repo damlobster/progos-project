@@ -28,7 +28,7 @@ int sector_read(FILE *f, uint32_t sector, void *data) {
         return ERR_IO;
     }
 
-    if (fread(data, sizeof (uint8_t), SECTOR_SIZE, f) != SECTOR_SIZE) {
+    if (fread(data, SECTOR_SIZE, 1, f) != 1) {
         return ERR_IO;
     }
 

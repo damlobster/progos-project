@@ -3,6 +3,7 @@
 #include "error.h"
 #include "mount.h"
 #include "sector.h"
+#include "unixv6fs.h"
 
 int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
