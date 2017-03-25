@@ -30,10 +30,12 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         return 0;
     }
 
-    int sector = inode_findsector(fv6->u, &fv6->i_node, fv6->offset);
-    if(sector <= 0) return sector; // inode not allocated or error
+    int sector = inode_findsector(fv6->u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
+    if (sector <= 0) {
+        return sector; // inode not allocated or error
+    }
+    
     int error = sector_read(fv6->u->f, sector, buf);
-
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;
@@ -46,7 +48,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         read = SECTOR_SIZE;
     }
 
-    fv6->offset += SECTOR_SIZE;
+    fv6->offset += SECTOR_SIZE; //FIXME increment only of size last_sector_size for the last block
 
     return error < 0 ? error : read;
 }
