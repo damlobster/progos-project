@@ -24,8 +24,8 @@ int inode_scan_print(const struct unix_filesystem *u) {
     for (int k = u->s.s_inode_start; k < u->s.s_isize; k++) {
 
         struct inode inodes[INODES_PER_SECTOR];
-        int r = sector_read(u->f, k, inodes);
-        if (r != 0) return r; // propagate sector_read error code if any
+        int error = sector_read(u->f, k, inodes);
+        if (error != 0) return error; // propagate sector_read error code if any
 
         // loop on all inode of the current sector
         for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
@@ -80,8 +80,8 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
     }
 
     struct inode inodes[INODES_PER_SECTOR];
-    int r = sector_read(u->f, sector_to_read, inodes);
-    if (r != 0) return r; // propagate sector_read error code if any
+    int error = sector_read(u->f, sector_to_read, inodes);
+    if (error != 0) return error; // propagate sector_read error
 
     uint8_t index = inr % INODES_PER_SECTOR;
     if (!(inodes[index].i_mode & IALLOC)) {

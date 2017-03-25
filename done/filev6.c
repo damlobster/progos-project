@@ -1,3 +1,9 @@
+/*
+ * filev6.c
+ *
+ *  Created on: Mar 15, 2017
+ *  Authors: Léonard Berney & Damien Martin
+ */
 
 #include "filev6.h"
 #include "error.h"
@@ -25,6 +31,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
     }
 
     int sector = inode_findsector(fv6->u, &fv6->i_node, fv6->offset);
+    if(sector <= 0) return sector; // inode not allocated or error
     int error = sector_read(fv6->u->f, sector, buf);
 
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;

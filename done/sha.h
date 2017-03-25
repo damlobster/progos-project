@@ -28,7 +28,7 @@ void print_sha_from_content(const unsigned char *content, size_t length);
  * @param inode the inocde of which we want to print the content
  * @param inr the inode number
  */
-void print_sha_inode(struct unix_filesystem *u, struct inode inode, int inr);
+void print_sha_inode(const struct unix_filesystem *u, struct inode inode, int inr);
 
 #ifdef __cplusplus
 }

@@ -28,12 +28,12 @@ void print_sha_from_content(const unsigned char *content, size_t length) {
     print_sha(hash);
 }
 
-void print_sha_inode(struct unix_filesystem *u, struct inode inode, int inr) {
+void print_sha_inode(const struct unix_filesystem *u, struct inode inode, int inr) {
     if (!(inode.i_mode & IALLOC)) {
         return;
     } else {
         if (inode.i_mode & IFDIR) {
-            puts("no SHA for directories.");
+            printf("SHA inode %d: no SHA for directories.\n", inr);
             return;
         } else {
             printf("SHA inode %d: ", inr);
@@ -51,4 +51,5 @@ void print_sha_inode(struct unix_filesystem *u, struct inode inode, int inr) {
     }
 
     print_sha_from_content(content, inode_getsize(&inode));
+    putchar('\n');
 }

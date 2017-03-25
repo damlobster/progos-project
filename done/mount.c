@@ -1,3 +1,9 @@
+/*
+ * mount.c
+ *
+ *  Created on: Mar 15, 2017
+ *  Authors: Léonard Berney & Damien Martin
+ */
 #include <inttypes.h>
 #include <string.h>
 #include "error.h"

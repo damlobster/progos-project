@@ -22,7 +22,8 @@ int test(const struct unix_filesystem *u) {
 
 	struct inode in;
 
-	for (int i_number = 3; i_number <= 5; i_number = i_number + 2) {
+	// print inode 3 and 5
+	for (int i_number = 3; i_number <= 5; i_number += 2) {
 		putchar('\n');
 
 		int err = inode_read(u, i_number, &in);
@@ -38,7 +39,6 @@ int test(const struct unix_filesystem *u) {
 				puts("the first sector of data which contains:");
 				char data[SECTOR_SIZE + 1];
 				data[SECTOR_SIZE] = '\0';
-				//memset(data, 0, sizeof(data));
 				int sector = inode_findsector(u, &in, 0);
 				sector_read(u->f, sector, data);
 				printf("%s\n", data);
@@ -48,11 +48,9 @@ int test(const struct unix_filesystem *u) {
 	}
 
 	puts("\nListing inodes SHA:");
-	puts("FIXME");
-	for(int i = 0; i<=u->s.s_isize; i++){
+	for (uint32_t i = 0; i <= u->s.s_isize*INODES_PER_SECTOR; ++i) {
 		inode_read(u, i, &in);
-		//FIXME print_sha_inode(u, in, i);
-		putchar('\n');
+		print_sha_inode(u, in, i);
 	}
 
 	return 0;
