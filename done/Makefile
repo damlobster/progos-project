@@ -1,4 +1,4 @@
-CC = clang
+CC = gcc
 CFLAGS = -std=c11 -g -Wall -pedantic -Wextra -c
 LDFLAGS = -lcrypto
 ALL_SOURCES = $(wildcard *.c)
@@ -19,5 +19,5 @@ $(EXECUTABLE): $(OBJECTS) $$@.o
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o test-inodes
+	rm -rf *.o $(EXECUTABLE)
 	
