@@ -10,7 +10,8 @@
 #include "inode.h"
 #include "sector.h"
 
-int filev6_open(const struct unix_filesystem *u, uint16_t inr, struct filev6 *fv6) {
+int filev6_open(const struct unix_filesystem *u, uint16_t inr,
+        struct filev6 *fv6) {
     M_REQUIRE_NON_NULL(fv6);
     M_REQUIRE_NON_NULL(u);
 
@@ -24,17 +25,19 @@ int filev6_open(const struct unix_filesystem *u, uint16_t inr, struct filev6 *fv
 
 int filev6_readblock(struct filev6 *fv6, void *buf) {
     M_REQUIRE_NON_NULL(fv6);
+    M_REQUIRE_NON_NULL(fv6->u);
     M_REQUIRE_NON_NULL(buf);
 
     if (fv6->offset >= inode_getsize(&fv6->i_node)) {
         return 0;
     }
 
-    int sector = inode_findsector(fv6->u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
+    int sector = inode_findsector(fv6->u, &fv6->i_node,
+            fv6->offset / SECTOR_SIZE);
     if (sector <= 0) {
         return sector; // inode not allocated or error
     }
-    
+
     int error = sector_read(fv6->u->f, sector, buf);
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {

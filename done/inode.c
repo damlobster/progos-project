@@ -76,6 +76,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
     uint16_t sector_to_read = u->s.s_inode_start;
     sector_to_read += inr / INODES_PER_SECTOR;
     if (sector_to_read < 0 || sector_to_read > u->s.s_isize) {
+        inode->i_mode = 0; //set inode as not allocated!
         return ERR_INODE_OUTOF_RANGE;
     }
 
@@ -85,6 +86,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
 
     uint8_t index = inr % INODES_PER_SECTOR;
     if (!(inodes[index].i_mode & IALLOC)) {
+        inode->i_mode = 0; // set inode as unallocated
         return ERR_UNALLOCATED_INODE;
     }
 
@@ -102,6 +104,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
 int inode_findsector(const struct unix_filesystem *u, const struct inode *i, int32_t file_sec_off) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(i);
+    M_REQUIRE_NON_NULL(i->i_addr);
     if (!(i->i_mode & IALLOC)) {
         return ERR_UNALLOCATED_INODE;
     }

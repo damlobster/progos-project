@@ -15,8 +15,9 @@ void print_sha(const unsigned char* sha) {
     putchar('\n');
 }
 
-void print_sha_inode(const struct unix_filesystem *u, struct inode inode, int inr) {
-    if (!(inode.i_mode & IALLOC)) {
+void print_sha_inode(const struct unix_filesystem *u, struct inode inode,
+        int inr) {
+    if (u == NULL || !(inode.i_mode & IALLOC)) {
         return;
     } else {
         if (inode.i_mode & IFDIR) {
@@ -28,7 +29,7 @@ void print_sha_inode(const struct unix_filesystem *u, struct inode inode, int in
     }
 
     struct filev6 fv6;
-    filev6_open(u, inr, &fv6);
+    if (filev6_open(u, inr, &fv6) != 0) return; //file open error
 
     SHA256_CTX sha;
     SHA256_Init(&sha);
