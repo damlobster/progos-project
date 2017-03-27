@@ -1,0 +1,6 @@
+Submission Failed
+
+preflight check script submit.sh returned error code 2
+stdout: b"clang -std=c11 -g -Wall -pedantic -Wextra   -c -o error.o error.c\n<builtin>: recipe for target 'error.o' failed\n"
+---
+stderr: b'make: clang: Command not found\nmake: *** [error.o] Error 127\n'
