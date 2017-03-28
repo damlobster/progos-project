@@ -75,7 +75,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
 
     uint16_t sector_to_read = u->s.s_inode_start;
     sector_to_read += inr / INODES_PER_SECTOR;
-    if (sector_to_read < 0 || sector_to_read > u->s.s_isize) {
+    if (sector_to_read > u->s.s_isize) {
         inode->i_mode = 0; //set inode as not allocated!
         return ERR_INODE_OUTOF_RANGE;
     }

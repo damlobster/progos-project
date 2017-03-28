@@ -19,11 +19,11 @@ all: $(ALL_SOURCES) $(EXECUTABLE)
 .SECONDEXPANSION:
 
 $(EXECUTABLE): $(OBJECTS) $$@.o
-	$(CC) $(LDFLAGS) $(OBJECTS) $@.o -o $@ 
+	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 
 
 
 .c.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
-	rm -rf *.o test-inodes
+	rm -rf *.o $(EXECUTABLE)
