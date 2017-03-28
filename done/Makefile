@@ -1,4 +1,11 @@
 CC = clang
+CLANG_INST = $(shell whereis $(CC))
+ifeq "$(CLANG_INST)" "$(CC):"
+  $(info CLANG is not installed !!!!!!!!!!!!!!)
+  CC = gcc
+endif
+
+
 CFLAGS = -std=c11 -g -Wall -pedantic -Wextra -c
 LDFLAGS = -lcrypto
 ALL_SOURCES = $(wildcard *.c)
@@ -20,4 +27,3 @@ $(EXECUTABLE): $(OBJECTS) $$@.o
 
 clean:
 	rm -rf *.o test-inodes
-	
