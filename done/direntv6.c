@@ -6,6 +6,8 @@
 #include "unixv6fs.h"
 #include "inode.h"
 
+#define MAXPATHLEN_UV6 128 // FIXME delete when found
+
 int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr, struct directory_reader *d) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(d);
@@ -40,9 +42,9 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr, const cha
 
     int ret;
     char name[DIRENT_MAXLEN + 1];
-    memset(name, NULL, DIRENT_MAXLEN + 1);
+    memset(name, 0, DIRENT_MAXLEN + 1);
     uint16_t inode_nr;
-    while ((ret = direntv6_readdir(d, name, &inode_nr)) > 0) {
+    while ((ret = direntv6_readdir(&d, name, &inode_nr)) > 0) {
         struct inode inode;
         error = inode_read(u, inode_nr, &inode);
         if (error < 0) {
@@ -55,9 +57,9 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr, const cha
             printf("FIL ");
         }
         char new_prefix[MAXPATHLEN_UV6];
-        memset(new_prefix, NULL, MAXPATHLEN_UV6);
+        memset(new_prefix, 0, MAXPATHLEN_UV6);
         strncat(new_prefix, prefix, MAXPATHLEN_UV6 - 1);
-        strncat(new_prefix, "/", strlen(new_prefix) - 1)
+        strncat(new_prefix, "/", strlen(new_prefix) - 1);
         strncat(new_prefix, name, strlen(new_prefix) - 1);
         printf("%s\n", new_prefix);
 

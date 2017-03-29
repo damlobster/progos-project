@@ -12,7 +12,7 @@ ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c, $(ALL_SOURCES))
 SOURCES += test-core.c
 OBJECTS = $(SOURCES:.c=.o)
-EXECUTABLE = test-inodes test-file
+EXECUTABLE = test-inodes test-file test-dirent
 
 all: $(ALL_SOURCES) $(EXECUTABLE)
 

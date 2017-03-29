@@ -1,4 +1,6 @@
 *.o
 
-test-inodes
+/test-core
+/test-inodes
 /test-file
+/test-dirent
