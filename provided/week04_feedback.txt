@@ -1,0 +1,48 @@
+Submission accepted
+
+stdout: CLANG is not installed !!!!!!!!!!!!!!
+gcc -std=c11 -g -Wall -pedantic -Wextra -c error.c -o error.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c inode.c -o inode.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c sector.c -o sector.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c sha.c -o sha.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c mount.c -o mount.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c filev6.c -o filev6.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c test-core.c -o test-core.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c test-inodes.c -o test-inodes.o 
+gcc error.o inode.o sector.o sha.o mount.o filev6.o test-core.o test-inodes.o -o test-inodes -lcrypto 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c test-file.c -o test-file.o 
+gcc error.o inode.o sector.o sha.o mount.o filev6.o test-core.o test-file.o -o test-file -lcrypto 
+simple test
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_fbmsize           : 0
+s_fbmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+inode   1 (DIR) len   16
+inode   2 (DIR) len   16
+inode   3 (FIL) len   18
+TESTS_BEGINNING
+TESTS_END
+-----
+diff from master
+5,6c5
+< s_fbmsize           : 0
+< s_fbmsize           : 0
+---
+> s_ibmsize           : 0
+20,21d18
+< TESTS_BEGINNING
+< TESTS_END
+
+stderr: 
