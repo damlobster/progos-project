@@ -48,8 +48,7 @@ void mountv6_print_superblock(const struct unix_filesystem *u) {
         printf("s_isize             : %" PRIu16 "\n", u->s.s_isize);
         printf("s_fsize             : %" PRIu16 "\n", u->s.s_fsize);
         printf("s_fbmsize           : %" PRIu16 "\n", u->s.s_fbmsize);
-        printf("s_fbmsize           : %" PRIu16 "\n", u->s.s_fbmsize);
-        printf("s_fbmsize           : %" PRIu16 "\n", u->s.s_fbmsize);
+        printf("s_ibmsize           : %" PRIu16 "\n", u->s.s_ibmsize);
         printf("s_inode_start       : %" PRIu16 "\n", u->s.s_inode_start);
         printf("s_block_start       : %" PRIu16 "\n", u->s.s_block_start);
         printf("s_fbm_start         : %" PRIu16 "\n", u->s.s_fbm_start);

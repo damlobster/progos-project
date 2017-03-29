@@ -6,7 +6,7 @@
 #include "unixv6fs.h"
 #include "inode.h"
 
-#define MAXPATHLEN_UV6 128 // FIXME delete when found
+#define MAXPATHLEN_UV6 1024 // FIXME delete when found
 
 int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr, struct directory_reader *d) {
     M_REQUIRE_NON_NULL(u);
@@ -37,7 +37,10 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr, const cha
     struct directory_reader d;
     int error = direntv6_opendir(u, inr, &d);
     if (error < 0) {
+        printf("FIL %s\n", prefix);
         return error;
+    } else {
+        printf("DIR %s/\n", prefix);
     }
 
     int ret;
@@ -51,17 +54,11 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr, const cha
             return error;
         }
 
-        if (inode.i_mode & IFDIR) {
-            printf("DIR ");
-        } else {
-            printf("FIL ");
-        }
         char new_prefix[MAXPATHLEN_UV6];
         memset(new_prefix, 0, MAXPATHLEN_UV6);
         strncat(new_prefix, prefix, MAXPATHLEN_UV6 - 1);
-        strncat(new_prefix, "/", strlen(new_prefix) - 1);
-        strncat(new_prefix, name, strlen(new_prefix) - 1);
-        printf("%s\n", new_prefix);
+        strncat(new_prefix, "/", MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
+        strncat(new_prefix, name, MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
 
         direntv6_print_tree(u, inode_nr, new_prefix);
     }
@@ -89,7 +86,7 @@ int direntv6_readdir(struct directory_reader *d, char *name,
     }
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
     strncpy(name, curdir->d_name, DIRENT_MAXLEN);
-    child_inr = &curdir->d_inumber;
+    *child_inr = curdir->d_inumber;
     d->cur++;
 
     return 1;
