@@ -15,6 +15,12 @@ void print_sha(const unsigned char* sha) {
     putchar('\n');
 }
 
+/**
+ * @brief print the sha of the content of an inode
+ * @param u the filesystem
+ * @param inode the inocde of which we want to print the content
+ * @param inr the inode number
+ */
 void print_sha_inode(const struct unix_filesystem *u, struct inode inode,
         int inr) {
     if (u == NULL || !(inode.i_mode & IALLOC)) {

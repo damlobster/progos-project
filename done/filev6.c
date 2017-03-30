@@ -10,6 +10,13 @@
 #include "inode.h"
 #include "sector.h"
 
+/**
+ * @brief open up a file corresponding to a given inode; set offset to zero
+ * @param u the filesystem (IN)
+ * @param inr he inode number (IN)
+ * @param fv6 the complete filve6 data structure (OUT)
+ * @return 0 on success; <0 on errror
+ */
 int filev6_open(const struct unix_filesystem *u, uint16_t inr,
         struct filev6 *fv6) {
     M_REQUIRE_NON_NULL(fv6);
@@ -23,6 +30,12 @@ int filev6_open(const struct unix_filesystem *u, uint16_t inr,
     return error;
 }
 
+/**
+ * @brief read at most SECTOR_SIZE from the file at the current cursor
+ * @param fv6 the filev6 (IN-OUT; offset will be changed)
+ * @param buf points to SECTOR_SIZE bytes of available memory (OUT)
+ * @return >0: the number of bytes of the file read; 0: end of file; <0 error
+ */
 int filev6_readblock(struct filev6 *fv6, void *buf) {
     M_REQUIRE_NON_NULL(fv6);
     M_REQUIRE_NON_NULL(fv6->u);

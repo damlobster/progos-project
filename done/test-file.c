@@ -42,7 +42,10 @@ int test(const struct unix_filesystem *u) {
                 puts("the first sector of data which contains:");
                 char data[SECTOR_SIZE + 1];
                 data[SECTOR_SIZE] = '\0';
+
                 int sector = inode_findsector(u, &in, 0);
+                if(sector<0) return sector;
+
                 sector_read(u->f, sector, data);
                 printf("%s\n", data);
                 puts("----");
@@ -51,7 +54,7 @@ int test(const struct unix_filesystem *u) {
     }
 
     puts("\nListing inodes SHA:");
-    for (uint32_t i = 1; i <= u->s.s_isize * INODES_PER_SECTOR; ++i) {
+    for (uint16_t i = 1; i <= u->s.s_isize * INODES_PER_SECTOR; ++i) {
         if (inode_read(u, i, &in) == 0) print_sha_inode(u, in, i);
     }
     return 0;

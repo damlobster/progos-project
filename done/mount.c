@@ -11,11 +11,17 @@
 #include "sector.h"
 #include "unixv6fs.h"
 
+/**
+ * @brief  mount a unix v6 filesystem
+ * @param filename name of the unixv6 filesystem on the underlying disk (IN)
+ * @param u the filesystem (OUT)
+ * @return 0 on success; <0 on error
+ */
 int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
     M_REQUIRE_NON_NULL(u);
 
-    memset(u, 0, sizeof (*u));
+    memset(u, 0, sizeof(*u));
 
     u->f = fopen(filename, "r"); //FIXME rw?
     if (u->f == NULL) {
@@ -40,6 +46,10 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     return 0;
 }
 
+/**
+ * @brief print to stdout the content of the superblock
+ * @param u - the mounted filesytem
+ */
 void mountv6_print_superblock(const struct unix_filesystem *u) {
     if (u == NULL) {
         puts("NULL");
@@ -62,6 +72,11 @@ void mountv6_print_superblock(const struct unix_filesystem *u) {
     }
 }
 
+/**
+ * @brief umount the given filesystem
+ * @param u - the mounted filesytem
+ * @return 0 on success; <0 on error
+ */
 int umountv6(struct unix_filesystem * u) {
     M_REQUIRE_NON_NULL(u);
 

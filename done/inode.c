@@ -21,7 +21,7 @@ int inode_scan_print(const struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(u);
 
     // loop on all inode sectors
-    for (int k = u->s.s_inode_start; k < u->s.s_isize; k++) {
+    for (uint32_t k = u->s.s_inode_start; k < u->s.s_isize; k++) {
 
         struct inode inodes[INODES_PER_SECTOR];
         int error = sector_read(u->f, k, inodes);
@@ -33,7 +33,9 @@ int inode_scan_print(const struct unix_filesystem *u) {
             if (inodes[i].i_mode & IALLOC) {
                 // inode is allocated --> print it
                 int size = inode_getsize(&inodes[i]);
-                char *type = (inodes[i].i_mode & IFDIR) ? SHORT_DIR_NAME : SHORT_FIL_NAME;
+                const char *type =
+                        (inodes[i].i_mode & IFDIR) ?
+                                SHORT_DIR_NAME : SHORT_FIL_NAME;
                 printf("inode %3d (%s) len %4d\n", i, type, size);
             }
         }
@@ -69,14 +71,15 @@ void inode_print(const struct inode *inode) {
  * @param inode the inode structure, read from disk (OUT)
  * @return 0 on success; <0 on error
  */
-int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inode) {
+int inode_read(const struct unix_filesystem *u, uint16_t inr,
+        struct inode *inode) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
 
     uint16_t sector_to_read = u->s.s_inode_start;
     sector_to_read += inr / INODES_PER_SECTOR;
     if (sector_to_read > u->s.s_isize) {
-        inode->i_mode = 0; //set inode as not allocated!
+        inode->i_mode = 0; //safety: set inode as not allocated!
         return ERR_INODE_OUTOF_RANGE;
     }
 
@@ -101,7 +104,8 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
  * @param file_sec_off the offset within the file (in sector-size units)
  * @return >0: the sector on disk;  0: unallocated;  <0 error
  */
-int inode_findsector(const struct unix_filesystem *u, const struct inode *i, int32_t file_sec_off) {
+int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
+        int32_t file_sec_off) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(i);
     M_REQUIRE_NON_NULL(i->i_addr);
@@ -119,7 +123,8 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i, int
     } else if (size_in_sec < 7 * ADDRESSES_PER_SECTOR) {
         // indirect addressing
         int16_t addrs[ADDRESSES_PER_SECTOR];
-        int err = sector_read(u->f, i->i_addr[file_sec_off / ADDRESSES_PER_SECTOR], addrs);
+        int err = sector_read(u->f,
+                i->i_addr[file_sec_off / ADDRESSES_PER_SECTOR], addrs);
         if (err != 0) {
             return err;
         }

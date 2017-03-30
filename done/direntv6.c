@@ -8,7 +8,15 @@
 
 #define MAXPATHLEN_UV6 1024 // FIXME delete when found
 
-int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr, struct directory_reader *d) {
+/**
+ * @brief opens a directory reader for the specified inode 'inr'
+ * @param u the mounted filesystem
+ * @param inr the inode -- which must point to an allocated directory
+ * @param d the directory reader (OUT)
+ * @return 0 on success; <0 on errror
+ */
+int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr,
+        struct directory_reader *d) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(d);
     M_REQUIRE_NON_NULL(u->f);
@@ -29,7 +37,15 @@ int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr, struct direc
     return error;
 }
 
-int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr, const char *prefix) {
+/**
+ * @brief debugging routine; print the a subtree (note: recursive)
+ * @param u a mounted filesystem
+ * @param inr the root of the subtree
+ * @param prefix the prefix to the subtree
+ * @return 0 on success; <0 on error
+ */
+int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
+        const char *prefix) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(u->f);
     M_REQUIRE_NON_NULL(prefix);
@@ -81,8 +97,8 @@ int direntv6_readdir(struct directory_reader *d, char *name,
 
     if (d->cur == d->last) {
         int read = filev6_readblock(&d->fv6, d->dirs);
-        if (read <= 0) return read;
-        d->last += read / sizeof (struct direntv6);
+        if (read <= 0) return read; // an error occured
+        d->last += read / sizeof(struct direntv6);
     }
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
     strncpy(name, curdir->d_name, DIRENT_MAXLEN);
