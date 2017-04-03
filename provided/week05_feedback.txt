@@ -1,0 +1,53 @@
+Submission accepted
+
+stdout: make: Nothing to be done for 'all'.
+making (our) test-inodes: done.
+making (our) test-file: done.
+=====
+testing our test-inodes on disk simple.uv6: done.
+diff from reference:
+5,6c5
+< s_fbmsize           : 0
+< s_fbmsize           : 0
+---
+> s_ibmsize           : 0
+=====
+testing our test-inodes on disk aiw.uv6: done.
+diff from reference:
+5,6c5
+< s_fbmsize           : 0
+< s_fbmsize           : 0
+---
+> s_ibmsize           : 0
+32,37c31,36
+< inode   0 (FIL) len 12147
+< inode   1 (FIL) len 10871
+< inode   2 (FIL) len 12149
+< inode   3 (FIL) len 1428
+< inode   4 (DIR) len   16
+< inode   5 (FIL) len 169856
+---
+> inode  16 (FIL) len 12147
+> inode  17 (FIL) len 10871
+> inode  18 (FIL) len 12149
+> inode  19 (FIL) len 1428
+> inode  20 (DIR) len   16
+> inode  21 (FIL) len 169856
+=====
+testing our test-file on disk simple.uv6: done.
+diff from reference:
+5,6c5
+< s_fbmsize           : 0
+< s_fbmsize           : 0
+---
+> s_ibmsize           : 0
+=====
+testing our test-file on disk aiw.uv6: done.
+diff from reference:
+5,6c5
+< s_fbmsize           : 0
+< s_fbmsize           : 0
+---
+> s_ibmsize           : 0
+
+stderr: 
