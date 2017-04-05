@@ -8,10 +8,11 @@ endif
 CFLAGS = -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
 -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings \
 -Wunreachable-code
-
-all-debug: CFLAGS += -fsanitize=address,undefined -Wconversion -Wformat -Werror=format-security -Werror=array-bounds
-
 LDFLAGS = -lcrypto
+
+debug: CFLAGS += -Wconversion -Wformat -Werror=format-security -Werror=array-bounds
+debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
+
 ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c, $(ALL_SOURCES))
 SOURCES += test-core.c
@@ -20,7 +21,7 @@ EXECUTABLE = test-inodes test-file test-dirent
 
 all: $(ALL_SOURCES) $(EXECUTABLE)
 
-all-with-Wconversion: all
+debug: all
 
 .SECONDEXPANSION:
 
