@@ -36,7 +36,7 @@ int inode_scan_print(const struct unix_filesystem *u) {
                 const char *type =
                         (inodes[i].i_mode & IFDIR) ?
                                 SHORT_DIR_NAME : SHORT_FIL_NAME;
-                printf("inode %3d (%s) len %4d\n", i, type, size);
+                printf("inode %3zu (%s) len %4d\n", i+(k-2)*INODES_PER_SECTOR, type, size);
             }
         }
     }

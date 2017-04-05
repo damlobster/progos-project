@@ -9,7 +9,7 @@ CFLAGS = -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
 -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings \
 -Wunreachable-code
 
-all-with-Wconversion: CFLAGS += -Wconversion
+all-debug: CFLAGS += -fsanitize=address,undefined -Wconversion -Wformat -Werror=format-security -Werror=array-bounds
 
 LDFLAGS = -lcrypto
 ALL_SOURCES = $(wildcard *.c)
