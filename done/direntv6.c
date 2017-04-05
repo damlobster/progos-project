@@ -107,3 +107,70 @@ int direntv6_readdir(struct directory_reader *d, char *name,
 
     return 1;
 }
+
+int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
+        const char *entry, size_t size) {
+
+    if (size == 0) return inr;
+
+    const char* current = entry;
+    int len = strchr(entry, '/') - current;
+
+    // strip multiples '/'
+    while (len == 1) {
+        current += len + 1;
+        len = strchr(current, '/') - current;
+    }
+
+    struct directory_reader dr;
+    int err = direntv6_opendir(u, inr, &dr);
+    if (err < 0) return err; // cannot open current dir
+
+    if (len < 0) {
+        if (current[1] == '\0') {
+            return inr; // empty path return current inr
+        } else {
+            len = size; // length of file name
+        }
+    }
+
+    char name[DIRENT_MAXLEN + 1];
+    name[DIRENT_MAXLEN] = '\0';
+    err = 1;
+    while (1 == err) {
+        err = direntv6_readdir(&dr, name, &inr);
+        if (err < 0) return err;
+        if (0 == err) return ERR_INODE_OUTOF_RANGE;
+        if (strncmp(name, current, len) == 0) err = 0;
+    }
+    //at this point a matching inode was found
+
+    struct inode inode;
+    err = inode_read(u, inr, &inode);
+    if (err < 0) return err;
+    if (inode.i_mode & IFDIR) {
+        // recurce on child dir
+        return direntv6_dirlookup_core(u, inr, current + len + 1, size - len);
+    } else {
+        if (current[len] != '\0') return ERR_INODE_OUTOF_RANGE;
+    }
+
+    return inr;
+}
+
+/**
+ * @brief get the inode number for the given path
+ * @param u a mounted filesystem
+ * @param inr the root of the subtree
+ * @param entry the pathname relative to the subtree
+ * @return inr on success; <0 on error
+ */
+int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
+        const char *entry) {
+    M_REQUIRE_NON_NULL(u);
+    M_REQUIRE_NON_NULL(u->f);
+    M_REQUIRE_NON_NULL(entry);
+
+    return direntv6_dirlookup_core(u, inr, entry, strlen(entry));
+
+}

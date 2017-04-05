@@ -59,6 +59,21 @@ enum error_codes {
         } \
     } while(0)
 
+///**
+// * @brief macro to assert that a function call did not return an error
+// */
+//#define M_THROW_ERROR(callee) (\
+//int _result_ = callee; \
+//    })
+//
+//inline int check_error(int error, char* callee, char* func, char*file){
+//    if (error < 0) {
+//        debug_print("ERROR: parameter %s is NULL when calling  %s() (defined in %s)\n",
+//                                callee, func, file);
+//    }
+//    return error;
+//}
+
 /**
 * @brief filesystem internal error messages. defined in error.c
 *
