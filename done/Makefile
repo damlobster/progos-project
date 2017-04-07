@@ -16,9 +16,7 @@ debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c shell.c, $(ALL_SOURCES))
 SOURCES += test-core.c
-OBJECTS = $(SOURCES:.c=.o)
-OBJECTS_TESTS = $(filter-out shell.o, $(OBJECTS))
-OBJECTS_SHELL = $(filter-out test-core.o, $(OBJECTS))
+OBJECTS = $(filter-out test-core.o shell.o, $(SOURCES:.c=.o))
 EXECUTABLE = test-inodes test-file test-dirent
 
 all: $(ALL_SOURCES) $(EXECUTABLE) shell
@@ -27,11 +25,11 @@ debug: all
 
 .SECONDEXPANSION:
 
-$(EXECUTABLE): $(OBJECTS_TESTS) $$@.o
-	$(CC) $(OBJECTS_TESTS) $@.o -o $@ $(LDFLAGS) 
+$(EXECUTABLE): $(OBJECTS) test-core.o $$@.o
+	$(CC) $(OBJECTS) test-core.o $@.o -o $@ $(LDFLAGS) 
 
-shell: $(OBJECTS_SHELL) $$@.o
-	$(CC) $(OBJECTS_SHELL) $@.o -o $@ $(LDFLAGS) 
+shell: $(OBJECTS) shell.o $$@.o
+	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@ 

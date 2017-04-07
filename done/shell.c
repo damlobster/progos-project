@@ -12,7 +12,6 @@
 #include "error.h"
 #include "mount.h"
 #include "direntv6.h"
-#include "error.c"
 #include "error.h"
 
 #define UNMOUNTED_FS 3;
