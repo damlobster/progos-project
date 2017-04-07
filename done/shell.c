@@ -21,7 +21,7 @@
                         return UNMOUNTED_FS; \
                     }
 
-#define PRINT_ERROR_FS(error) printf("ERROR FS: %s", ERR_MESSAGES[error - ERR_FIRST]);
+#define PRINT_ERROR_FS(error) printf("ERROR FS: %s\n", ERR_MESSAGES[error - ERR_FIRST]);
 
 typedef int (*shell_fct)(void);
 typedef int (*shell_fct0)();
@@ -40,6 +40,7 @@ struct unix_filesystem u;
 
 int do_help();
 int do_exit();
+int do_mount(char* fname);
 int do_mkfs(const char* arg1);
 int do_mkdir(const char** args);
 int do_lsall(const char** args);
@@ -51,6 +52,8 @@ struct shell_map shell_cmds[] =
                 { "help", (shell_fct) do_help, "display this help", 0, "" }, //
                 { "exit", (shell_fct) do_exit, "exit shell", 0, "" }, //
                 { "quit", (shell_fct) do_exit, "exit shell", 0, "" }, //
+                { "mount", (shell_fct) do_mount, "mount a filesystem", 1,
+                        "<diskname>" }, //
                 { "mkfs", (shell_fct) do_mkfs, "create a new filesystem", 3,
                         "<diskname> <#inodes> <#blocks>" }, //
                 { "mkdir", (shell_fct) do_mkdir, "create a new directory", 1,
@@ -79,6 +82,10 @@ int do_help() {
 
 int do_exit() {
     exit(0);
+}
+
+int do_mount(char* fname) {
+    return mountv6(fname, &u);
 }
 
 int do_mkfs(const char* arg1) {
@@ -181,7 +188,7 @@ int main(void) {
                     puts("Wrong number of arguments");
                     break;
                 }
-                if (result != 0) printf("result: %d", result);
+                if (result != 0) PRINT_ERROR_FS(result);
             }
 
         }
