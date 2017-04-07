@@ -70,7 +70,7 @@ struct shell_map shell_cmds[] =
 
 int do_help() {
     for (size_t i = 0; i < sizeof(shell_cmds) / sizeof(struct shell_map); i++) {
-        printf("- %s %s: %s.", shell_cmds[i].name, shell_cmds[i].args,
+        printf("- %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args,
                 shell_cmds[i].help);
     }
 
@@ -134,9 +134,11 @@ int tokenize_input(char* string, char** args) {
     M_REQUIRE_NON_NULL(args);
 
     int i = 1;
-    args[0] = strtok(string, " ");
-    while (i <= 3) {
-        args[i++] = strtok(NULL, " ");
+    char* arg = strtok(string, " ");
+    args[0] = arg;
+    while (arg != NULL && i <= 3) {
+        arg = strtok(NULL, " ");
+        args[i++] = arg;
     }
 
     return i - 1;
@@ -152,36 +154,35 @@ struct shell_map* get_command(const char* cmd) {
 }
 
 int main(void) {
-    char* args[4];
+    char *args[4];
 
     while (!feof(stdin) && !ferror(stdin)) {
-        args[0][0] = '\0';
-        args[1][0] = '\0';
-        args[2][0] = '\0';
-        args[3][0] = '\0';
 
         char line[255] = "";
-        //gets(line);
+        gets(line);
         int n = tokenize_input(line, args);
-        if (n != 0) {
+        if (n != 0 && args[0] != NULL) {
             struct shell_map* cmd = get_command(args[0]);
             int result = 0;
-            switch (cmd->argc) {
-            case 0:
-                result = ((shell_fct0) cmd->fct)();
-                break;
-            case 1:
-                result = ((shell_fct1) cmd->fct)(args[1]);
-                break;
-            case 2:
-                result = ((shell_fct2) cmd->fct)(args[1], args[2]);
-                break;
-            default:
-                puts("Wrong number of arguments");
-                break;
+            if (cmd == NULL) {
+                puts("Unknow command!");
+            } else {
+                switch (cmd->argc) {
+                case 0:
+                    result = ((shell_fct0) cmd->fct)();
+                    break;
+                case 1:
+                    result = ((shell_fct1) cmd->fct)(args[1]);
+                    break;
+                case 2:
+                    result = ((shell_fct2) cmd->fct)(args[1], args[2]);
+                    break;
+                default:
+                    puts("Wrong number of arguments");
+                    break;
+                }
+                if (result != 0) printf("result: %d", result);
             }
-
-            printf("result: %d", result);
 
         }
     }
