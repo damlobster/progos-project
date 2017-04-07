@@ -22,6 +22,7 @@ EXECUTABLE = test-inodes test-file test-dirent
 all: $(ALL_SOURCES) $(EXECUTABLE) shell
 
 debug: all
+	$(info debug build!!!)
 
 .SECONDEXPANSION:
 

@@ -108,17 +108,26 @@ int direntv6_readdir(struct directory_reader *d, char *name,
     return 1;
 }
 
+/**
+ * @brief internal method used by direntv6_dirlookup
+ * @param u a mounted filesystem
+ * @param inr the root of the subtree
+ * @param entry the pathname relative to the subtree
+ * @param size the size of the string "entry"
+ * @return inr on success; <0 on error
+ */
 int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         const char *entry, size_t size) {
 
     if (size == 0) return inr;
 
     const char* current = entry;
-    int len = strchr(entry, '/') - current;
+    const char* next = strchr(entry, '/');
+    int len = (next == NULL) ? strlen(current) : next - current;
 
     // strip multiples '/'
-    while (len == 1) {
-        current += len + 1;
+    while (len == 0) {
+        current += 1;
         len = strchr(current, '/') - current;
     }
 
@@ -152,7 +161,7 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         // recurce on child dir
         return direntv6_dirlookup_core(u, inr, current + len + 1, size - len);
     } else {
-        if (current[len] != '\0') return ERR_INODE_OUTOF_RANGE;
+        if (current[len+1] != '\0') return ERR_INODE_OUTOF_RANGE;
     }
 
     return inr;
