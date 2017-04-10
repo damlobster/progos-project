@@ -1,0 +1,73 @@
+Submission accepted
+
+stdout: making (our) test-inodes: 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code error.c -o error.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code inode.c -o inode.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sector.c -o sector.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sha.c -o sha.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code direntv6.c -o direntv6.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code mount.c -o mount.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code filev6.c -o filev6.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-core.c -o test-core.o 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-inodes.c -o test-inodes.o 
+gcc error.o inode.o sector.o sha.o direntv6.o mount.o filev6.o test-core.o test-inodes.o -o test-inodes -lcrypto 
+test-inodes done.
+making (our) test-file: 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-file.c -o test-file.o 
+gcc error.o inode.o sector.o sha.o direntv6.o mount.o filev6.o test-core.o test-file.o -o test-file -lcrypto 
+test-file done.
+making (our) test-dirent: 
+gcc -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-dirent.c -o test-dirent.o 
+gcc error.o inode.o sector.o sha.o direntv6.o mount.o filev6.o test-core.o test-dirent.o -o test-dirent -lcrypto 
+test-dirent done.
+=====
+testing our test-inodes on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-inodes on disk aiw.uv6: done.
+diff from reference:
+=====
+testing our test-file on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-file on disk aiw.uv6: done.
+diff from reference:
+=====
+testing our test-dirent on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-dirent on disk aiw.uv6: done.
+diff from reference:
+
+stderr: In file included from inode.c:11:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+In file included from sector.c:10:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+In file included from sha.c:3:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+In file included from direntv6.c:5:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+direntv6.c: In function â€˜direntv6_dirlookup_coreâ€™:
+direntv6.c:126:48: warning: signed and unsigned type in conditional expression [-Wsign-compare]
+     int len = (next == NULL) ? strlen(current) : next - current;
+                                                ^
+In file included from mount.c:9:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+In file included from filev6.c:9:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
+In file included from test-core.c:12:0:
+error.h:65:1: warning: multi-line comment [-Wcomment]
+ //#define M_THROW_ERROR(callee) (\
+ ^
