@@ -94,13 +94,19 @@ struct shell_map shell_cmds[] =
 
 enum shell_errors {
     SHELL_ERR_FIRST = 1, //
-    SHELL_ERR_UNMOUNTED_FS
+    SHELL_ERR_UNMOUNTED_FS,
+    SHELL_ERR_UNDEF_ON_DIR
 };
 
 const char* SHELL_ERROR_MSGS[] = { //
-        "mount the FS before the operation" //
+        "no FS mounted, mount one with: mount <path>", //
+                "this command does not work on a directory" //
         };
 
+/**
+ * Print the error a message in case of error
+ * @param err the error code
+ */
 void print_error(int err) {
     if (err < 0) {
         printf("ERROR FS: %s\n", ERR_MESSAGES[err - ERR_FIRST]);
@@ -120,7 +126,7 @@ int do_istat(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
     inode_print(&in);
 
     return 0;
@@ -149,9 +155,9 @@ int do_sha(const char** args) {
     int inr = direntv6_dirlookup(&u, 1, args[0]);
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
     if (in.i_mode & IFDIR) {
-        printf("SHA inode %d: no SHA for directories", inr);
+        return SHELL_ERR_UNDEF_ON_DIR;
     } else {
         print_sha_inode(&u, in, inr);
     }
@@ -192,10 +198,8 @@ int do_help(const char** args) {
  * @return -
  */
 int do_exit(const char** args) {
-    if (u.f != NULL) {
-        umountv6(&u);
-    }
-    exit(0);
+    fclose(stdin);
+    return 0;
 }
 
 /**
@@ -262,15 +266,13 @@ int do_cat(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t)inr, &in));
     if (in.i_mode & IFDIR) {
-        puts("ERROR SHELL: cat on a directory is not defined"); //TODO
-        return 0;
-
+        return SHELL_ERR_UNDEF_ON_DIR;
     }
 
     struct filev6 fv6;
-    if (filev6_open(&u, inr, &fv6) < 0) {
+    if (filev6_open(&u, (uint16_t)inr, &fv6) < 0) {
         return ERR_IO;
     }
 
@@ -322,6 +324,8 @@ struct shell_map* get_command(const char* cmd) {
 int main(void) {
     char* args[4];
 
+    puts("Type a command (help to list them)");
+
     while (!feof(stdin) && !ferror(stdin)) {
 
         char line[255];
@@ -336,7 +340,7 @@ int main(void) {
                         "Command not found! Type 'help' to display available commands.");
             } else {
                 if ((size_t) n != cmd->argc) {
-
+                    printf("wrong number of arguments, usage: %s", cmd->help);
                 } else {
                     result = cmd->fct(&args[1]);
                 }
@@ -346,5 +350,11 @@ int main(void) {
 
         }
     }
+
+    // unmount filesystem
+    if (u.f != NULL) {
+        umountv6(&u);
+    }
+
     return 0;
 }

@@ -5,12 +5,12 @@ ifeq "$(CLANG_INST)" "$(CC):"
   CC = gcc
 endif
 
-CFLAGS = -std=c11 -g -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
+CFLAGS = -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
 -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings \
 -Wunreachable-code
 LDFLAGS = -lcrypto
 
-debug: CFLAGS += -Wconversion -Wformat -Werror=format-security -Werror=array-bounds
+debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds
 debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 
 ALL_SOURCES = $(wildcard *.c)
