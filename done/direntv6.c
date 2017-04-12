@@ -128,7 +128,7 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         next = strchr(current, '/');
     }
 
-    if (current[1] == '\0') {
+    if (current[0]=='/' && current[1] == '\0') {
         return inr; // empty path return current inr
     }
 
