@@ -1,0 +1,20 @@
+help
+lsall
+cat klsdfj
+istat 23
+inode sdfkj
+sha asidj
+psb
+mount sdkljf
+mount disks/first.uv6
+psb
+cat kjladf
+istat 0
+istat 23
+istat jkf
+inode 0
+inode 23
+inode jkf
+sha dfjk
+
+

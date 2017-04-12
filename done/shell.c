@@ -67,7 +67,7 @@ int do_psb(const char** args);
 /**
  * Map of the shell functions
  */
-struct shell_map shell_cmds[] ={
+struct shell_map shell_cmds[] = {
     { "help", do_help, "display this help", 0, ""}, //
     { "exit", do_exit, "exit shell", 0, ""}, //
     { "quit", do_exit, "exit shell", 0, ""}, //
@@ -123,8 +123,10 @@ void print_error(int err) {
  * @return <0 on error, 0 o/w
  */
 int do_istat(const char** args) {
+    FS_MOUNTED;
+    
     int inr = atoi(args[0]);
-    if (inr < 0) {
+    if (inr < 1) {
         return ERR_INODE_OUTOF_RANGE;
     }
 
@@ -141,8 +143,12 @@ int do_istat(const char** args) {
  * @return <0 on error, 0 o/w
  */
 int do_inode(const char** args) {
+    FS_MOUNTED;
+
     int inr = direntv6_dirlookup(&u, 1, args[0]);
-    printf("inode: %d", inr);
+    if (inr > 0) {
+        printf("inode: %d\n", inr);
+    }
 
     return inr;
 }
@@ -154,8 +160,11 @@ int do_inode(const char** args) {
  */
 int do_sha(const char** args) {
     FS_MOUNTED;
-
+    
     int inr = direntv6_dirlookup(&u, 1, args[0]);
+    if (inr < 0) {
+        return inr;
+    }
 
     struct inode in;
     M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
