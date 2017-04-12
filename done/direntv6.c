@@ -119,33 +119,27 @@ int direntv6_readdir(struct directory_reader *d, char *name,
 int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         const char *entry, size_t size) {
 
-    if (size == 0) return inr;
-
     const char* current = entry;
     const char* next = strchr(entry, '/');
-    int len = (next == NULL) ? strlen(current) : next - current;
 
     // strip multiples '/'
-    while (len == 0) {
+    while (next != NULL && (next - current <= 1)) {
         current += 1;
-        len = strchr(current, '/') - current;
+        next = strchr(current, '/');
+    }
+
+    if (current[1] == '\0') {
+        return inr; // empty path return current inr
     }
 
     struct directory_reader dr;
     int err = direntv6_opendir(u, inr, &dr);
     if (err < 0) return err; // cannot open current dir
 
-    if (len < 0) {
-        if (current[1] == '\0') {
-            return inr; // empty path return current inr
-        } else {
-            len = size; // length of file name
-        }
-    }
-
     char name[DIRENT_MAXLEN + 1];
     name[DIRENT_MAXLEN] = '\0';
     err = 1;
+    size_t len = (next == NULL) ? strlen(current) : (size_t)(next - current);
     while (1 == err) {
         err = direntv6_readdir(&dr, name, &inr);
         if (err < 0) return err;
@@ -161,7 +155,7 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         // recurce on child dir
         return direntv6_dirlookup_core(u, inr, current + len + 1, size - len);
     } else {
-        if (current[len+1] != '\0') return ERR_INODE_OUTOF_RANGE;
+        if (current[len + 1] != '\0') return ERR_INODE_OUTOF_RANGE;
     }
 
     return inr;
