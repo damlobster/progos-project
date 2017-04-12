@@ -126,7 +126,7 @@ int do_istat(const char** args) {
     FS_MOUNTED;
     
     int inr = atoi(args[0]);
-    if (inr < 1) {
+    if (inr < 0) {
         return ERR_INODE_OUTOF_RANGE;
     }
 
