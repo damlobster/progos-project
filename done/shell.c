@@ -146,11 +146,12 @@ int do_inode(const char** args) {
     FS_MOUNTED;
 
     int inr = direntv6_dirlookup(&u, 1, args[0]);
-    if (inr > 0) {
-        printf("inode: %d\n", inr);
+    if (inr < 0) {
+        return inr;
     }
-
-    return inr;
+    printf("inode: %d\n", inr);
+    
+    return 0;
 }
 
 /**

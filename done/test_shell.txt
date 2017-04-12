@@ -16,5 +16,3 @@ inode 0
 inode 23
 inode jkf
 sha dfjk
-
-
