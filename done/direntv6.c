@@ -113,11 +113,10 @@ int direntv6_readdir(struct directory_reader *d, char *name,
  * @param u a mounted filesystem
  * @param inr the root of the subtree
  * @param entry the pathname relative to the subtree
- * @param size the size of the string "entry"
  * @return inr on success; <0 on error
  */
 int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
-        const char *entry, size_t size) {
+        const char *entry) {
 
     const char* current = entry;
     const char* next = strchr(entry, '/');
@@ -128,7 +127,7 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         next = strchr(current, '/');
     }
 
-    if (current[0]=='/' && current[1] == '\0') {
+    if (current[0] == '\0' || (current[0] == '/' && current[1] == '\0')) {
         return inr; // empty path return current inr
     }
 
@@ -139,12 +138,12 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
     char name[DIRENT_MAXLEN + 1];
     name[DIRENT_MAXLEN] = '\0';
     err = 1;
-    size_t len = (next == NULL) ? strlen(current) : (size_t)(next - current);
+    size_t len = (next == NULL) ? strlen(current) : (size_t) (next - current);
     while (1 == err) {
         err = direntv6_readdir(&dr, name, &inr);
         if (err < 0) return err;
         if (0 == err) return ERR_INODE_OUTOF_RANGE;
-        if (strncmp(name, current, len) == 0) err = 0;
+        if (strncmp(name, current, len) == 0 && strlen(name) == len) err = 0;
     }
     //at this point a matching inode was found
 
@@ -153,7 +152,7 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
     if (err < 0) return err;
     if (inode.i_mode & IFDIR) {
         // recurce on child dir
-        return direntv6_dirlookup_core(u, inr, current + len + 1, size - len);
+        return direntv6_dirlookup_core(u, inr, current + len + 1);
     } else {
         if (current[len + 1] != '\0') return ERR_INODE_OUTOF_RANGE;
     }
@@ -174,6 +173,6 @@ int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(u->f);
     M_REQUIRE_NON_NULL(entry);
 
-    return direntv6_dirlookup_core(u, inr, entry, strlen(entry));
+    return direntv6_dirlookup_core(u, inr, entry);
 
 }
