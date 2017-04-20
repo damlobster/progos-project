@@ -15,6 +15,8 @@
 #include "inode.h"
 #include "sha.h"
 
+//#define DEBUG
+
 #define FS_MOUNTED if(u.f == NULL) { \
                         return SHELL_ERR_UNMOUNTED_FS; \
                     }
@@ -138,33 +140,21 @@ int do_psb(const char** args);
 /**
  * Map of the shell functions
  */
-struct shell_map shell_cmds[] =
-        {
-                { "help", do_help, "display this help", 0, "" }, //
-                { "exit", do_exit, "exit shell", 0, "" }, //
-                { "quit", do_exit, "exit shell", 0, "" }, //
-                { "mount", do_mount, "mount a filesystem", 1, "<diskname>" }, //
-                { "mkfs", do_mkfs, "create a new filesystem", 3,
-                        "<diskname> <#inodes> <#blocks>" }, //
-                { "mkdir", do_mkdir, "create a new directory", 1, "<dirname>" }, //
-                { "lsall", do_lsall,
-                        "list all directories and files contained in the currently mounted filesystem",
-                        0, "" }, //
-                { "add", do_add, "add a new file", 2, "<src-fullpath> <dst>" }, //
-                { "cat", do_cat, "display the content of a file", 1,
-                        "<pathname>" }, //
-                { "istat", do_istat,
-                        "display information about the provided inode", 1,
-                        "<inode_nr>" }, //
-                { "inode", do_inode, "display the inode number of a file", 1,
-                        "<pathname>" }, //
-                { "sha", do_sha, "display the SHA of a file", 1, "<pathname>" }, //
-                { "echo", do_shell_echo, "set the echo mode of the shell", 1,
-                        "<on/off>" }, //
-                { "psb", do_psb,
-                        "Print SuperBlock of the currently mounted filesystem",
-                        0, "" } //
-        };
+struct shell_map shell_cmds[] = {
+    { "help", do_help, "display this help", 0, ""}, //
+    { "exit", do_exit, "exit shell", 0, ""}, //
+    { "quit", do_exit, "exit shell", 0, ""}, //
+    { "mkfs", do_mkfs, "create a new filesystem", 3, "<diskname> <#inodes> <#blocks>"}, //
+    { "mount", do_mount, "mount a filesystem", 1, "<diskname>"}, //
+    { "mkdir", do_mkdir, "create a new directory", 1, "<dirname>"}, //
+    { "lsall", do_lsall, "list all directories and files contained in the currently mounted filesystem", 0, ""}, //
+    { "add", do_add, "add a new file", 2, "<src-fullpath> <dst>"}, //
+    { "cat", do_cat, "display the content of a file", 1, "<pathname>"}, //
+    { "istat", do_istat, "display information about the provided inode", 1, "<inode_nr>"}, //
+    { "inode", do_inode, "display the inode number of a file", 1, "<pathname>"}, //
+    { "sha", do_sha, "display the SHA of a file", 1, "<pathname>"}, //
+    { "psb", do_psb, "Print SuperBlock of the currently mounted filesystem", 0, ""} //
+};
 
 /**
  * Enumeration of shell errors
@@ -178,11 +168,11 @@ enum shell_errors {
 /**
  * Shell errors messages
  */
-const char* SHELL_ERROR_MSGS[] = { "", //
-        "no FS mounted, mount one with: mount <path>", //
-        "this command does not work on a directory", //
-        "not yet implemented" //
-        };
+const char* SHELL_ERROR_MSGS[] = {"", //
+    "no FS mounted, mount one with: mount <path>", //
+    "this command does not work on a directory", //
+    "not yet implemented" //
+};
 
 /**
  * Print the error a message in case of error
@@ -210,7 +200,7 @@ int do_istat(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
     inode_print(&in);
 
     return 0;
@@ -247,7 +237,7 @@ int do_sha(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
     if (in.i_mode & IFDIR) {
         return SHELL_ERR_UNDEF_ON_DIR;
     } else {
@@ -263,6 +253,7 @@ int do_sha(const char** args) {
  * @return 0
  */
 int do_psb(const char** args) {
+    (void) args;
     FS_MOUNTED;
 
     mountv6_print_superblock(&u);
@@ -276,7 +267,8 @@ int do_psb(const char** args) {
  * @return 0
  */
 int do_help(const char** args) {
-    for (size_t i = 0; i < sizeof(shell_cmds) / sizeof(struct shell_map); i++) {
+    (void) args;
+    for (size_t i = 0; i < sizeof (shell_cmds) / sizeof (struct shell_map); i++) {
         printf("- %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args,
                 shell_cmds[i].help);
     }
@@ -290,6 +282,7 @@ int do_help(const char** args) {
  * @return -
  */
 int do_exit(const char** args) {
+    (void) args;
     fclose(stdin);
     return 0;
 }
@@ -330,6 +323,7 @@ int do_mkdir(const char** args) {
  * @return 0 on success; <0 on error
  */
 int do_lsall(const char** args) {
+    (void) args;
     FS_MOUNTED;
 
     return direntv6_print_tree(&u, 1, "");
@@ -358,7 +352,7 @@ int do_cat(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
     if (in.i_mode & IFDIR) {
         return SHELL_ERR_UNDEF_ON_DIR;
     }
@@ -379,22 +373,12 @@ int do_cat(const char** args) {
 }
 
 /**
- * Set the echo mode of the shell
- * @param args[0] "on"/"off"
- * @return 0
- */
-int do_shell_echo(char** args) {
-    shell_echo_on = strcasecmp(args[0], "on") ? 0 : 1;
-    puts(shell_echo_on ? "#echo ON" : "#echo OFF");
-    return 0;
-}
-/**
  * Extract arguments from a line of the shell
  * @param string the line to parse
  * @param args OUT where to store the arguments
  * @return the number of arguments read
  */
-int tokenize_input(char* string, char** args) {
+int tokenize_input(char* string, const char** args) {
     M_REQUIRE_NON_NULL(string);
     M_REQUIRE_NON_NULL(args);
 
@@ -415,7 +399,7 @@ int tokenize_input(char* string, char** args) {
  * @return the pointer to the command, NULL if no match found
  */
 struct shell_map* get_command(const char* cmd) {
-    for (size_t i = 0; i < sizeof(shell_cmds) / sizeof(struct shell_map); i++) {
+    for (size_t i = 0; i < sizeof (shell_cmds) / sizeof (struct shell_map); i++) {
         if (strcmp(cmd, shell_cmds[i].name) == 0) {
             return &shell_cmds[i];
         }
@@ -424,27 +408,25 @@ struct shell_map* get_command(const char* cmd) {
 }
 
 int main(void) {
-    char* args[4];
+    const char* args[4];
 
     puts("Type a command (help to list them)");
 
     while (!feof(stdin) && !ferror(stdin)) {
-
         char line[255];
         memset(line, 0, 255);
         fgets(line, 255, stdin);
 
-        if (shell_echo_on) {
-            printf("#%s", line);
-        }
+#ifdef DEBUG
+        printf("#%s", line);
+#endif
 
         int n = tokenize_input(line, args);
         if (n != -1 && args[0] != NULL) {
             struct shell_map* cmd = get_command(args[0]);
             int result = 0;
             if (cmd == NULL) {
-                puts(
-                        "Command not found! Type 'help' to display available commands.");
+                puts("Command not found! Type 'help' to display available commands.");
             } else {
                 if ((size_t) n != cmd->argc) {
                     printf("wrong number of arguments, usage: %s", cmd->help);
