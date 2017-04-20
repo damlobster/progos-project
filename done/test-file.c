@@ -29,7 +29,7 @@ int test(const struct unix_filesystem *u) {
     for (int i_number = 3; i_number <= 5; i_number += 2) {
         putchar('\n');
 
-        int err = inode_read(u, i_number, &in);
+        int err = inode_read(u, (uint16_t)i_number, &in);
         if (err != 0) {
             printf("filev6 open failed for inode #%d.\n", i_number);
         } else {
@@ -46,7 +46,7 @@ int test(const struct unix_filesystem *u) {
                 int sector = inode_findsector(u, &in, 0);
                 if(sector<0) return sector;
 
-                sector_read(u->f, sector, data);
+                sector_read(u->f, (uint32_t)sector, data);
                 printf("%s\n", data);
                 puts("----");
             }

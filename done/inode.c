@@ -76,20 +76,18 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
 
-    uint16_t sector_to_read = u->s.s_inode_start;
+    long unsigned int sector_to_read = u->s.s_inode_start;
     sector_to_read += inr / INODES_PER_SECTOR;
     if (sector_to_read > u->s.s_isize) {
-        inode->i_mode = 0; //safety: set inode as not allocated!
         return ERR_INODE_OUTOF_RANGE;
     }
 
     struct inode inodes[INODES_PER_SECTOR];
-    int error = sector_read(u->f, sector_to_read, inodes);
+    int error = sector_read(u->f, (uint16_t)sector_to_read, inodes);
     if (error != 0) return error; // propagate sector_read error
 
     uint8_t index = inr % INODES_PER_SECTOR;
     if (!(inodes[index].i_mode & IALLOC)) {
-        inode->i_mode = 0; // set inode as unallocated
         return ERR_UNALLOCATED_INODE;
     }
 
@@ -116,7 +114,7 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
     int32_t size_in_sec = (inode_getsize(i) / SECTOR_SIZE);
 
     if (file_sec_off > size_in_sec) {
-        return 0; //ERR_OFFSET_OUT_OF_RANGE;
+        return ERR_OFFSET_OUT_OF_RANGE;
     } else if (size_in_sec <= 8) {
         //direct addressing
         return i->i_addr[file_sec_off];

@@ -51,7 +51,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         return sector; // inode not allocated or error
     }
 
-    int error = sector_read(fv6->u->f, sector, buf);
+    int error = sector_read(fv6->u->f, (uint32_t)sector, buf);
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;

@@ -23,7 +23,7 @@ void print_sha(const unsigned char* sha) {
  */
 void print_sha_inode(const struct unix_filesystem *u, struct inode inode,
         int inr) {
-    if (u == NULL || !(inode.i_mode & IALLOC)) {
+    if (u == NULL || !(inode.i_mode & IALLOC) || inr < 0) {
         return;
     } else {
         if (inode.i_mode & IFDIR) {
@@ -35,15 +35,18 @@ void print_sha_inode(const struct unix_filesystem *u, struct inode inode,
     }
 
     struct filev6 fv6;
+#pragma GCC diagnostic ignored "-Wconversion"
     if (filev6_open(u, inr, &fv6) != 0) return; //file open error
-
+#pragma GCC diagnostic pop
     SHA256_CTX sha;
     SHA256_Init(&sha);
 
     unsigned char sector[SECTOR_SIZE];
     int code;
     while ((code = filev6_readblock(&fv6, sector)) > 0) {
-        SHA256_Update(&sha, sector, code);
+#pragma GCC diagnostic ignored "-Wconversion"
+        SHA256_Update(&sha, sector, (size_t)code);
+#pragma GCC diagnostic pop
     }
 
     unsigned char hash[SHA256_DIGEST_LENGTH];

@@ -6,7 +6,7 @@
 #include "unixv6fs.h"
 #include "inode.h"
 
-#define MAXPATHLEN_UV6 1024 // FIXME delete when found
+#define MAXPATHLEN_UV6 1024 // max size in chars of a path
 
 /**
  * @brief opens a directory reader for the specified inode 'inr'
@@ -98,7 +98,10 @@ int direntv6_readdir(struct directory_reader *d, char *name,
     if (d->cur == d->last) {
         int read = filev6_readblock(&d->fv6, d->dirs);
         if (read <= 0) return read; // an error occured
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
         d->last += read / sizeof(struct direntv6);
+#pragma GCC diagnostic pop
     }
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
     strncpy(name, curdir->d_name, DIRENT_MAXLEN);
