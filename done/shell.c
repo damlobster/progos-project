@@ -131,11 +131,6 @@ int do_sha(const char** args);
  * @return 0
  */
 int do_psb(const char** args);
-/**
- * Toggle the "echoing" of commands typed
- * @param args NOT USED
- * @return 0
- */int do_shell_echo(char** args);
 
 /**
  * Map of the shell functions
@@ -269,7 +264,7 @@ int do_psb(const char** args) {
 int do_help(const char** args) {
     (void) args;
     for (size_t i = 0; i < sizeof (shell_cmds) / sizeof (struct shell_map); i++) {
-        printf("- %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args,
+        printf("    - %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args,
                 shell_cmds[i].help);
     }
 
@@ -410,9 +405,11 @@ struct shell_map* get_command(const char* cmd) {
 int main(void) {
     const char* args[4];
 
-    puts("Type a command (help to list them)");
+    puts("Shell interpretor\nType \"help\" for more information.");
 
     while (!feof(stdin) && !ferror(stdin)) {
+        printf(">>> ");
+        fflush(stdout);
         char line[255];
         memset(line, 0, 255);
         fgets(line, 255, stdin);
