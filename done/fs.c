@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include "mount.h"
+#include "error.h"
 
 struct unix_filesystem fs;
 
@@ -57,8 +58,10 @@ static int arg_parse(void *data, const char *filename, int key, struct fuse_args
     (void) outargs;
     if (key == FUSE_OPT_KEY_NONOPT && fs.f == NULL && filename != NULL) {
         if(mountv6(filename, &fs)<0){
+            debug_print("Unable to mount FS: %50s", filename);
             exit(1);
         }
+        debug_print("FS mounted: %50s", filename);
         return 0;
     }
     return 1;
