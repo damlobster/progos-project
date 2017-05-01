@@ -42,6 +42,22 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset,
     return 0;
 }
 
+/* From https://github.com/libfuse/libfuse/wiki/Option-Parsing.
+ * This will look up into the args to search for the name of the FS.
+ */
+static int arg_parse(void *data, const char *filename, int key, struct fuse_args *outargs)
+{
+    (void) data;
+    (void) outargs;
+    if (key == FUSE_OPT_KEY_NONOPT && fs.f == NULL && filename != NULL) {
+
+        // A VOUS DE REMPLIR ICI (voir ci-dessous)
+
+        return 0;
+    }
+    return 1;
+}
+
 static struct fuse_operations available_ops = { .getattr = fs_getattr,
         .readdir = fs_readdir, .read = fs_read, };
 
