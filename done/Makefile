@@ -39,7 +39,7 @@ clean:
 	rm -rf *.o $(EXECUTABLE) shell
 	
 fs.o: fs.c
-	$(COMPILE.c) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
+	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
 
 fs: fs.o
-	$(LINK.c) -o $@ $^ $(LDLIBS) $$(pkg-config fuse --libs)
+	$(CC) -o $@ $^ $(LDLIBS) $$(pkg-config fuse --libs)
