@@ -1,0 +1,29 @@
+Submission accepted
+
+stdout:
+=====
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code error.c -o error.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code inode.c -o inode.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sector.c -o sector.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sha.c -o sha.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code direntv6.c -o direntv6.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code mount.c -o mount.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code filev6.c -o filev6.o 
+gcc -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code shell.c -o shell.o 
+gcc error.o inode.o sector.o sha.o direntv6.o mount.o filev6.o shell.o -o shell -lcrypto 
+Submission accepted
+
+-----
+stderr:
+shell.c: In function 'do_mkfs':
+shell.c:302:26: warning: unused parameter 'args' [-Wunused-parameter]
+ int do_mkfs(const char** args) {
+                          ^
+shell.c: In function 'do_mkdir':
+shell.c:311:27: warning: unused parameter 'args' [-Wunused-parameter]
+ int do_mkdir(const char** args) {
+                           ^
+shell.c: In function 'do_add':
+shell.c:332:25: warning: unused parameter 'args' [-Wunused-parameter]
+ int do_add(const char** args) {
+                         ^
