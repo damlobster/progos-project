@@ -14,7 +14,7 @@ debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-
 debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 
 ALL_SOURCES = $(wildcard *.c)
-SOURCES = $(filter-out test-%.c shell.c, $(ALL_SOURCES))
+SOURCES = $(filter-out test-%.c shell.c fs.c, $(ALL_SOURCES))
 SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o, $(SOURCES:.c=.o))
 EXECUTABLE = test-inodes test-file test-dirent
@@ -42,4 +42,4 @@ fs.o: fs.c
 	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
 
 fs: fs.o
-	$(CC) -o $@ $^ $(LDLIBS) $$(pkg-config fuse --libs)
+	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)

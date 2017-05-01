@@ -24,6 +24,8 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
     int res = 0;
 
     memset(stbuf, 0, sizeof(struct stat));
+    
+    stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
     return res;
 }
