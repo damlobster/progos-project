@@ -20,6 +20,7 @@
 #include "inode.h"
 #include "unixv6fs.h"
 #include "direntv6.h"
+#include "error.h"
 
 struct unix_filesystem fs;
 
@@ -109,7 +110,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
     if (ret < 0) {
         return ret;
     }
-    
+
     unsigned char sector[SECTOR_SIZE + 1];
     sector[SECTOR_SIZE] = '\0';
     int read = 0;
@@ -131,8 +132,10 @@ static int arg_parse(void *data, const char *filename, int key, struct fuse_args
     (void) outargs;
     if (key == FUSE_OPT_KEY_NONOPT && fs.f == NULL && filename != NULL) {
         if (mountv6(filename, &fs) < 0) {
+            debug_print("Unable to mount FS: %50s", filename);
             exit(1);
         }
+        debug_print("FS mounted: %50s", filename);
         return 0;
     }
     return 1;
