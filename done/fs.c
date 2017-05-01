@@ -15,6 +15,10 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include "mount.h"
+
+struct unix_filesystem fs;
 
 static int fs_getattr(const char *path, struct stat *stbuf) {
     int res = 0;
@@ -50,9 +54,9 @@ static int arg_parse(void *data, const char *filename, int key, struct fuse_args
     (void) data;
     (void) outargs;
     if (key == FUSE_OPT_KEY_NONOPT && fs.f == NULL && filename != NULL) {
-
-        // A VOUS DE REMPLIR ICI (voir ci-dessous)
-
+        if(mountv6(filename, &fs)<0){
+            exit(1);
+        }
         return 0;
     }
     return 1;
