@@ -36,7 +36,7 @@ shell: $(OBJECTS) shell.o $$@.o
 	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
-	rm -rf *.o $(EXECUTABLE) shell
+	rm -rf *.o $(EXECUTABLE) shell fs
 	
 fs.o: fs.c
 	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
