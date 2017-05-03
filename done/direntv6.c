@@ -100,7 +100,7 @@ int direntv6_readdir(struct directory_reader *d, char *name,
         if (read <= 0) return read; // an error occured
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
-        d->last += read / sizeof(struct direntv6);
+        d->last += read / sizeof (struct direntv6);
 #pragma GCC diagnostic pop
     }
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
@@ -145,7 +145,9 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
     while (1 == err) {
         err = direntv6_readdir(&dr, name, &inr);
         if (err < 0) return err;
-        if (0 == err) return ERR_INODE_OUTOF_RANGE;
+        if (0 == err) {
+            return ERR_INODE_OUTOF_RANGE;
+        }
         if (strncmp(name, current, len) == 0 && strlen(name) == len) err = 0;
     }
     //at this point a matching inode was found

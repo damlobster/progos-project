@@ -8,6 +8,8 @@
  gcc -Wall hello.c `pkg-config fuse --cflags --libs` -o hello
  */
 
+#define DEBUG
+
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
@@ -16,6 +18,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <time.h>
 #include "mount.h"
 #include "inode.h"
 #include "unixv6fs.h"
@@ -31,20 +34,25 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
 
     int inr = direntv6_dirlookup(&fs, 1, path);
     if (inr < 0) {
+        debug_print("fs_getattr 1 %s: %d\n", path, inr);
         return inr;
     }
 
     struct inode inode;
     int ret = inode_read(&fs, inr, &inode);
     if (ret < 0) {
+        debug_print("fs_getattr 2: %d\n", ret);
         return ret;
     }
 
-    stbuf->st_atim = inode.i_atime;
+    struct timespec atim = {inode.i_atime[0], inode.i_atime[1]};
+    stbuf->st_atim =  atim;
     stbuf->st_blksize = SECTOR_SIZE;
     stbuf->st_blocks = inode_getsectorsize(&inode);
-    stbuf->st_ctim = NULL;
-    stbuf->st_dev = NULL;
+
+    struct timespec ctim = {0,0};
+    stbuf->st_ctim = ctim;
+    stbuf->st_dev = 0;
     stbuf->st_gid = inode.i_gid;
     stbuf->st_ino = inr;
 
@@ -54,11 +62,14 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
         stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH | S_IFREG;
     }
 
-    stbuf->st_mtim = inode.i_mtime;
+    struct timespec mtim = {inode.i_mtime[0], inode.i_mtime[1]};
+    stbuf->st_mtim = mtim;
     stbuf->st_nlink = inode.i_nlink;
-    stbuf->st_rdev = NULL;
+    stbuf->st_rdev = 0;
     stbuf->st_size = inode_getsize(&inode);
     stbuf->st_uid = inode.i_uid;
+
+    debug_print("fs_getattr 3 %s: %d\n", path, res);
 
     return res;
 }
@@ -70,14 +81,16 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
     filler(buf, ".", NULL, 0);
     filler(buf, "..", NULL, 0);
 
-    int inr = direntv6_dirlookup(&fs, 1, path);
+    uint16_t inr = direntv6_dirlookup(&fs, 1, path);
     if (inr < 0) {
+        debug_print("fs_readdir 1: %d\n", inr);
         return inr;
     }
 
     struct directory_reader reader;
     int ret = direntv6_opendir(&fs, inr, &reader);
     if (ret < 0) {
+        debug_print("fs_readdir 2: %d\n", ret);
         return ret;
     }
 
@@ -86,6 +99,8 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
     while ((ret = direntv6_readdir(&reader, name, &inr)) > 0) {
         filler(buf, name, NULL, 0);
     }
+
+    debug_print("fs_readdir 3: %d\n", 0);
 
     return 0;
 }
