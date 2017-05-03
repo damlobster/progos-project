@@ -77,8 +77,8 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
  */
 int filev6_lseek(struct filev6 *fv6, int32_t offset){
     M_REQUIRE_NON_NULL(fv6);
-
-    if (inode_getsize(&fv6->i_node)>= offset) {
+    int32_t size = inode_getsize(&fv6->i_node);
+    if (offset > size) {
         return ERR_OFFSET_OUT_OF_RANGE;
     }
     fv6->offset = offset;
