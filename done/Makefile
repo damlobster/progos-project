@@ -5,7 +5,7 @@ ifeq "$(CLANG_INST)" "$(CC):"
   CC = gcc
 endif
 
-CFLAGS = -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
+CFLAGS = -g -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
 -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings \
 -Wunreachable-code
 LDFLAGS = -lcrypto
@@ -19,7 +19,7 @@ SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o, $(SOURCES:.c=.o))
 EXECUTABLE = test-inodes test-file test-dirent
 
-all: $(ALL_SOURCES) $(EXECUTABLE) shell
+all: $(ALL_SOURCES) $(EXECUTABLE) shell fs
 
 debug: all
 	$(info debug build!!!)
@@ -39,7 +39,7 @@ clean:
 	rm -rf *.o $(EXECUTABLE) shell fs
 	
 fs.o: fs.c
-	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
+	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -g -o $@ -c $<
 
 fs: fs.o
 	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)
