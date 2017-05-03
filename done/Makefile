@@ -19,7 +19,7 @@ SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o, $(SOURCES:.c=.o))
 EXECUTABLE = test-inodes test-file test-dirent
 
-all: $(ALL_SOURCES) $(EXECUTABLE) shell
+all: $(ALL_SOURCES) $(EXECUTABLE) shell fs
 
 debug: all
 	$(info debug build!!!)
@@ -39,7 +39,7 @@ clean:
 	rm -rf *.o $(EXECUTABLE) shell fs
 	
 fs.o: fs.c
-	$(CC) -g -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -o $@ -c $<
+	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) -g -o $@ -c $<
 
 fs: fs.o
 	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)
