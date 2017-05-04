@@ -33,10 +33,11 @@ int inode_scan_print(const struct unix_filesystem *u) {
             if (inodes[i].i_mode & IALLOC) {
                 // inode is allocated --> print it
                 int size = inode_getsize(&inodes[i]);
-                const char *type =
-                        (inodes[i].i_mode & IFDIR) ?
-                                SHORT_DIR_NAME : SHORT_FIL_NAME;
-                printf("inode %3zu (%s) len %4d\n", i+(k-2)*INODES_PER_SECTOR, type, size);
+                const char *type = (inodes[i].i_mode & IFDIR) ?
+                SHORT_DIR_NAME :
+                                                                SHORT_FIL_NAME;
+                printf("inode %3zu (%s) len %4d\n",
+                        i + (k - 2) * INODES_PER_SECTOR, type, size);
             }
         }
     }
@@ -83,7 +84,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr,
     }
 
     struct inode inodes[INODES_PER_SECTOR];
-    int error = sector_read(u->f, (uint16_t)sector_to_read, inodes);
+    int error = sector_read(u->f, (uint16_t) sector_to_read, inodes);
     if (error != 0) return error; // propagate sector_read error
 
     uint8_t index = inr % INODES_PER_SECTOR;

@@ -10,27 +10,40 @@
 #include <stdlib.h>
 
 #include "bmblock.h"
+#include "mount.h"
 
+int test(struct unix_filesystem *u){
+    puts("### fbm:");
+    bm_print(u->fbm);
+    puts("### ibm:");
+    bm_print(u->ibm);
+
+    return 0;
+}
+
+#ifdef TESTS_BITMAP
 int main(){
-    struct bmblock_array* bmb = bm_alloc(67, 562);
+#define BLOCK_END 4096
+#define INCR 4
+    struct bmblock_array* bmb = bm_alloc(67, BLOCK_END);
 
     puts("BMSET *****************************************");
     puts("BM with a one every 7 bits");
-    for(uint64_t i = 67; i<800; i+=7){
+    for(uint64_t i = 67; i<=BLOCK_END; i+=INCR){
         bm_set(bmb, i);
     }
     bm_print(bmb);
 
     puts("\n\nBM_CLEAR ******************************************");
     puts("clear one bit at one every two");
-    for(uint64_t i = 67; i<800; i+=14){
+    for(uint64_t i = 67; i<=BLOCK_END; i+=2*INCR){
         bm_clear(bmb, i);
     }
     bm_print(bmb);
 
     puts("\n\nBM_SET with FIND **********************************");
     puts("find a free bit set it to one");
-    for(uint64_t i = 67; i<560; i++){
+    for(uint64_t i = 67; i<=BLOCK_END; i++){
         int b = bm_find_next(bmb);
         bm_set(bmb, (uint64_t)b);
     }
@@ -55,3 +68,4 @@ int main(){
 
     free(bmb);
 }
+#endif

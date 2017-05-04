@@ -6,6 +6,8 @@
  */
 #include <inttypes.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "error.h"
 #include "mount.h"
 #include "sector.h"
@@ -17,9 +19,9 @@ void fill_ibm(struct unix_filesystem *u) {
         return;
     }
     // loop on all inode sectors
-    for (uint32_t k = u->s.s_inode_start; k < u->s.s_isize; k++) {
+    for (uint32_t k = 0; k < u->s.s_isize; k++) {
         struct inode inodes[INODES_PER_SECTOR];
-        int error = sector_read(u->f, k, inodes);
+        int error = sector_read(u->f, u->s.s_inode_start + k, inodes);
 
         // loop on all inode of the current sector
         for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
@@ -37,7 +39,7 @@ void fill_fbm(struct unix_filesystem *u) {
         return;
     }
 
-    for (size_t i = u->s.s_inode_start; i < u->s.s_isize; i++) {
+    for (uint16_t i = u->s.s_inode_start; i < u->s.s_isize; i++) {
         struct inode inode;
         int ret = inode_read(u, i, &inode);
         if (ret < 0) {
@@ -47,8 +49,8 @@ void fill_fbm(struct unix_filesystem *u) {
         int sector;
         int offset = 0;
         while ((sector = inode_findsector(u, &inode, offset)) > 0) {
-            bm_set(u->fbm, sector);
-            offset++; //FIXME incrémenter de plus que 1?
+            bm_set(u->fbm, (uint64_t) sector);
+            offset++;
         }
     }
 }
@@ -63,7 +65,7 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
     M_REQUIRE_NON_NULL(u);
 
-    memset(u, 0, sizeof (*u));
+    memset(u, 0, sizeof(*u));
 
     u->f = fopen(filename, "r"); //FIXME rw?
     if (u->f == NULL) {
@@ -85,9 +87,11 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
         return error;
     }
 
-    u->ibm = bm_alloc(u->s.s_inode_start + 1, u->s.s_isize - 1);
-    u->fbm = bm_alloc(u->s.s_block_start + 1, u->s.s_fsize - 1);
-
+    u->ibm = bm_alloc(2, (uint64_t) u->s.s_isize * INODES_PER_SECTOR);
+    u->fbm = bm_alloc((uint64_t) u->s.s_block_start + 1,
+            (uint64_t) u->s.s_fsize);
+    //u->s.s_fbmsize = 1 + bm_sizeof(u->fbm) / SECTOR_SIZE; //FIXME nécessaire?
+    //u->s.s_ibmsize = 1 + bm_sizeof(u->ibm) / SECTOR_SIZE;
     fill_ibm(u);
     fill_fbm(u);
 
@@ -127,6 +131,9 @@ void mountv6_print_superblock(const struct unix_filesystem *u) {
  */
 int umountv6(struct unix_filesystem * u) {
     M_REQUIRE_NON_NULL(u);
+
+    free(u->fbm);
+    free(u->ibm);
 
     int error = fclose(u->f);
     if (error != 0) {

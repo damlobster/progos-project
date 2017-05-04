@@ -69,6 +69,13 @@ int bm_find_next(struct bmblock_array *bmblock_array);
  */
 void bm_print(struct bmblock_array *bmblock_array);
 
+/**
+ * Get the size in byte of the bitmap block
+ * @param bmblock_array
+ * @return 0 if bmblock_array is NULL, otherwise the number of bytes
+ */
+size_t bm_sizeof(struct bmblock_array * bmblock_array);
+
 #ifdef __cplusplus
 }
 #endif

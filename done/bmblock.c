@@ -9,9 +9,9 @@
 #include "bmblock.h"
 #include "error.h"
 
-#define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / 64)
+#define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / BITS_PER_VECTOR)
 #define BMB_GET_WORD(bmb, n) (bmb->bm[BMB_GET_WORD_IDX(bmb, n)])
-#define BMB_GET_BIT_IDX(bmb, n) ((n - bmb->min) % 64)
+#define BMB_GET_BIT_IDX(bmb, n) ((n - bmb->min) % BITS_PER_VECTOR)
 
 /**
  * @brief allocate a new bmblock_array to handle elements indexed
@@ -24,9 +24,9 @@ struct bmblock_array *bm_alloc(uint64_t min, uint64_t max) {
     if (min > max) return NULL;
     uint64_t nb_bits = max - min + 1;
     struct bmblock_array* bmb = calloc(1,
-            sizeof(struct bmblock_array) + (nb_bits / 64));
+            sizeof(struct bmblock_array) + (nb_bits / BITS_PER_VECTOR));
     bmb->cursor = 0;
-    bmb->length = nb_bits;
+    bmb->length = nb_bits / BITS_PER_VECTOR + 1;
     bmb->min = min;
     bmb->max = max;
     return bmb;
@@ -89,12 +89,12 @@ int bm_find_next(struct bmblock_array *bmblock_array) {
     M_REQUIRE_NON_NULL(bmblock_array);
 
     while (bmblock_array->bm[bmblock_array->cursor] == UINT64_C(-1)
-            && bmblock_array->cursor <= bmblock_array->length / 64) {
-        //update cursor if current 64 bits are used
+            && bmblock_array->cursor <= bmblock_array->length) {
+        //update cursor if current BITS_PER_VECTOR bits are used
         bmblock_array->cursor++;
     }
 
-    if (bmblock_array->cursor > bmblock_array->length / 64) {
+    if (bmblock_array->cursor > bmblock_array->length) {
         return ERR_BITMAP_FULL;
     }
 
@@ -103,7 +103,8 @@ int bm_find_next(struct bmblock_array *bmblock_array) {
             (bmblock_array->bm[bmblock_array->cursor] & (UINT64_C(1) << n));
             n++) {
     }
-    uint64_t next_free = bmblock_array->min + 64 * bmblock_array->cursor + n;
+    uint64_t next_free = bmblock_array->min
+            + BITS_PER_VECTOR * bmblock_array->cursor + n;
     return next_free <= bmblock_array->max ? (int) next_free : ERR_BITMAP_FULL;
 }
 
@@ -128,8 +129,7 @@ void bm_print(struct bmblock_array *bmblock_array) {
     printf(
             "\n     0      7       15       23       31       39       45       55       63");
 #endif
-    uint64_t size_in_word = (bmblock_array->length - 1) / 64 + 1;
-    for (uint64_t i = 0; i < size_in_word; i++) {
+    for (uint64_t i = 0; i < bmblock_array->length; i++) {
 #ifdef DEBUG
         printf("\n%03zu: ", i);
 #else
@@ -147,3 +147,18 @@ void bm_print(struct bmblock_array *bmblock_array) {
     printf("\n**********BitMap Block END************\n");
     fflush(stdout);
 }
+
+/**
+ * Get the size in byte of the bitmap block
+ * @param bmblock_array
+ * @return <0 if bmblock_array is NULL, otherwise the number of bytes
+ */
+size_t bm_sizeof(struct bmblock_array * bmblock_array) {
+    if (bmblock_array == NULL) {
+        return 0;
+    }
+
+    return sizeof(struct bmblock_array)
+            + (bmblock_array->length - 1) * (BITS_PER_VECTOR / 8);
+}
+

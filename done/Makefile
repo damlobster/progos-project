@@ -16,10 +16,10 @@ debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c shell.c fs.c, $(ALL_SOURCES))
 SOURCES += test-core.c
-OBJECTS = $(filter-out test-core.o shell.o test-bmblock.o, $(SOURCES:.c=.o))
-EXECUTABLE = test-inodes test-file test-dirent
+OBJECTS = $(filter-out test-core.o shell.o test-bmb.o, $(SOURCES:.c=.o))
+EXECUTABLE = test-inodes test-file test-dirent test-bmblock
 
-all: $(ALL_SOURCES) $(EXECUTABLE) shell fs test-bmblock
+all: $(ALL_SOURCES) $(EXECUTABLE) shell fs test-bmb
 
 debug: all
 	$(info debug build!!!)
@@ -32,17 +32,20 @@ $(EXECUTABLE): $(OBJECTS) test-core.o $$@.o
 shell: $(OBJECTS) shell.o $$@.o
 	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 
 
-test-bmblock: $(OBJECTS) test-bmblock.o $$@.o
-	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 
-
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
-	rm -rf *.o $(EXECUTABLE) shell fs test-bmblock
-	
+	rm -rf *.o $(EXECUTABLE) shell fs test-bmb test-core
+
 fs.o: fs.c
 	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) $(CFLAGS) -o $@ -c $<
 
 fs: fs.o
 	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)
+	
+test-bmb.o: test-bmblock.c
+	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) $(CFLAGS) -DTESTS_BITMAP -o $@ -c $<
+
+test-bmb: $(OBJECTS) test-bmb.o $$@.o
+	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 
