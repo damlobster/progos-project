@@ -10,6 +10,48 @@
 #include "mount.h"
 #include "sector.h"
 #include "unixv6fs.h"
+#include "inode.h"
+
+void fill_ibm(struct unix_filesystem *u) {
+    if (u == NULL) {
+        return;
+    }
+    // loop on all inode sectors
+    for (uint32_t k = u->s.s_inode_start; k < u->s.s_isize; k++) {
+        struct inode inodes[INODES_PER_SECTOR];
+        int error = sector_read(u->f, k, inodes);
+
+        // loop on all inode of the current sector
+        for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
+            if (error != 0) {
+                bm_set(u->ibm, k * INODES_PER_SECTOR + i); //FIXME pas sûr
+            } else if (inodes[i].i_mode & IALLOC) {
+                bm_set(u->ibm, k * INODES_PER_SECTOR + i);
+            }
+        }
+    }
+}
+
+void fill_fbm(struct unix_filesystem *u) {
+    if (u == NULL) {
+        return;
+    }
+
+    for (size_t i = u->s.s_inode_start; i < u->s.s_isize; i++) {
+        struct inode inode;
+        int ret = inode_read(u, i, &inode);
+        if (ret < 0) {
+            continue;
+        }
+
+        int sector;
+        int offset = 0;
+        while ((sector = inode_findsector(u, &inode, offset)) > 0) {
+            bm_set(u->fbm, sector);
+            offset++; //FIXME incrémenter de plus que 1?
+        }
+    }
+}
 
 /**
  * @brief  mount a unix v6 filesystem
@@ -21,7 +63,7 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
     M_REQUIRE_NON_NULL(u);
 
-    memset(u, 0, sizeof(*u));
+    memset(u, 0, sizeof (*u));
 
     u->f = fopen(filename, "r"); //FIXME rw?
     if (u->f == NULL) {
@@ -42,6 +84,12 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     if (error != 0) {
         return error;
     }
+
+    u->ibm = bm_alloc(u->s.s_inode_start + 1, u->s.s_isize - 1);
+    u->fbm = bm_alloc(u->s.s_block_start + 1, u->s.s_fsize - 1);
+
+    fill_ibm(u);
+    fill_fbm(u);
 
     return 0;
 }
