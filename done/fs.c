@@ -50,7 +50,7 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
     stbuf->st_blksize = SECTOR_SIZE;
     stbuf->st_blocks = inode_getsectorsize(&inode);
 
-    struct timespec ctim = {0,0};
+    struct timespec ctim = {0l,0l};
     stbuf->st_ctim = ctim;
     stbuf->st_dev = 0;
     stbuf->st_gid = inode.i_gid;
@@ -106,7 +106,6 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 }
 
 static int fs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-    size_t len;
     (void) fi;
 
     int inr = direntv6_dirlookup(&fs, 1, path);
@@ -157,7 +156,7 @@ static int arg_parse(void *data, const char *filename, int key, struct fuse_args
 }
 
 static struct fuse_operations available_ops = {.getattr = fs_getattr,
-    .readdir = fs_readdir, .read = fs_read,};
+    .readdir = fs_readdir, .read = fs_read};
 
 int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
