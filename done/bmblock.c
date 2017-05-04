@@ -9,6 +9,10 @@
 #include "bmblock.h"
 #include "error.h"
 
+#define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / 64)
+#define BMB_GET_WORD(bmb, n) (bmb->bm[BMB_GET_WORD_IDX(bmb, n)])
+#define BMB_GET_BIT_IDX(bmb, n) ((n - bmb->min) % 64)
+
 /**
  * @brief allocate a new bmblock_array to handle elements indexed
  * between min and may (included, thus (max-min+1) elements).
@@ -39,8 +43,8 @@ int bm_get(struct bmblock_array *bmblock_array, uint64_t x) {
     if (x < bmblock_array->min || x > bmblock_array->max) {
         return ERR_BAD_PARAMETER;
     }
-    return (bmblock_array->bm[(x - bmblock_array->min) / 64]
-            >> ((x - bmblock_array->min) % 64)) & 1;
+    return (BMB_GET_WORD(bmblock_array, x) >> BMB_GET_BIT_IDX(bmblock_array, x))
+            & 1;
 }
 
 /**
@@ -51,8 +55,13 @@ int bm_get(struct bmblock_array *bmblock_array, uint64_t x) {
 void bm_set(struct bmblock_array *bmblock_array, uint64_t x) {
     if (bmblock_array == NULL) return;
     if (x < bmblock_array->min || x > bmblock_array->max) return;
-    bmblock_array->bm[(x - bmblock_array->min) / 64] |= UINT64_C(1)
-            << ((x - bmblock_array->min) % 64);
+    BMB_GET_WORD(bmblock_array, x) |= UINT64_C(
+            1) << BMB_GET_BIT_IDX(bmblock_array, x);
+
+    if (bmblock_array->cursor == BMB_GET_WORD_IDX(bmblock_array, x)
+            && BMB_GET_WORD(bmblock_array, x) == UINT64_MAX) {
+        bmblock_array->cursor++;
+    }
 }
 
 /**
@@ -63,8 +72,12 @@ void bm_set(struct bmblock_array *bmblock_array, uint64_t x) {
 void bm_clear(struct bmblock_array *bmblock_array, uint64_t x) {
     if (bmblock_array == NULL) return;
     if (x < bmblock_array->min || x > bmblock_array->max) return;
-    bmblock_array->bm[(x - bmblock_array->min) / 64] &= (UINT64_MAX - 1)
-            << ((x - bmblock_array->min) % 64);
+    BMB_GET_WORD(bmblock_array, x) &= (UINT64_C(1)
+            << BMB_GET_BIT_IDX(bmblock_array, x)) ^ UINT64_MAX;
+
+    if (bmblock_array->cursor > BMB_GET_WORD_IDX(bmblock_array, x)) {
+        bmblock_array->cursor = BMB_GET_WORD_IDX(bmblock_array, x);
+    }
 }
 
 /**
@@ -73,7 +86,25 @@ void bm_clear(struct bmblock_array *bmblock_array, uint64_t x) {
  * @return <0 on failure, the value of the next unused value otherwise
  */
 int bm_find_next(struct bmblock_array *bmblock_array) {
-    return -100;
+    M_REQUIRE_NON_NULL(bmblock_array);
+
+    while (bmblock_array->bm[bmblock_array->cursor] == UINT64_C(-1)
+            && bmblock_array->cursor <= bmblock_array->length / 64) {
+        //update cursor if current 64 bits are used
+        bmblock_array->cursor++;
+    }
+
+    if (bmblock_array->cursor > bmblock_array->length / 64) {
+        return ERR_BITMAP_FULL;
+    }
+
+    unsigned char n;
+    for (n = 0; n < 63 && //
+            (bmblock_array->bm[bmblock_array->cursor] & (UINT64_C(1) << n));
+            n++) {
+    }
+    uint64_t next_free = bmblock_array->min + 64 * bmblock_array->cursor + n;
+    return next_free <= bmblock_array->max ? (int) next_free : ERR_BITMAP_FULL;
 }
 
 /**
@@ -81,7 +112,10 @@ int bm_find_next(struct bmblock_array *bmblock_array) {
  * @param bmblock_array the array we want to see
  */
 void bm_print(struct bmblock_array *bmblock_array) {
-    if (bmblock_array == NULL) debug_print("bmblock_array is NULL",);
+    if (bmblock_array == NULL) {
+        debug_print("bmblock_array is %s", "NULL");
+        return;
+    }
 
     puts("**********BitMap Block START**********");
     printf("length: %zu\n", bmblock_array->length);
@@ -89,19 +123,27 @@ void bm_print(struct bmblock_array *bmblock_array) {
     printf("max: %zu\n", bmblock_array->max);
     printf("cursor: %zu\n", bmblock_array->cursor);
 
-    puts("content:");
-    uint64_t size_in_word = (bmblock_array->length - 1) / 64;
+    printf("content:");
+#ifdef DEBUG
+    printf(
+            "\n     0      7       15       23       31       39       45       55       63");
+#endif
+    uint64_t size_in_word = (bmblock_array->length - 1) / 64 + 1;
     for (uint64_t i = 0; i < size_in_word; i++) {
+#ifdef DEBUG
+        printf("\n%03zu: ", i);
+#else
         printf("\n%zu: ", i);
-
+#endif
         uint64_t word = bmblock_array->bm[i];
 
-        for (int bit = 64; bit >= 0; bit--) {
+        for (int bit = 63; bit >= 0; bit--) {
             putchar((word & 1) ? '1' : '0');
             word = word >> 1;
-            if (word % 8 == 0) putchar(' ');
+            if (bit % 8 == 0) putchar(' ');
         }
     }
 
     printf("\n**********BitMap Block END************\n");
+    fflush(stdout);
 }

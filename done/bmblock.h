@@ -8,11 +8,12 @@
  * @date summer 2016
  */
 
+#include <stdint.h>
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
 
 struct bmblock_array {
     size_t length;
