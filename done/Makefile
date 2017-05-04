@@ -5,7 +5,7 @@ ifeq "$(CLANG_INST)" "$(CC):"
   CC = gcc
 endif
 
-CFLAGS = -g -std=c11 -Wall -pedantic -Wextra -c -Wfloat-equal -Wshadow \
+CFLAGS = -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow \
 -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings \
 -Wunreachable-code
 LDFLAGS = -lcrypto

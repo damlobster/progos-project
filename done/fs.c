@@ -8,8 +8,6 @@
  gcc -Wall hello.c `pkg-config fuse --cflags --libs` -o hello
  */
 
-#define DEBUG
-
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
