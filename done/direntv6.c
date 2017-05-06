@@ -178,6 +178,7 @@ int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(u->f);
     M_REQUIRE_NON_NULL(entry);
 
+    debug_print("dirlookup: root=%d, path=%s\n", inr, entry);
     return direntv6_dirlookup_core(u, inr, entry);
 
 }

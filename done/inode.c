@@ -93,6 +93,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr,
     }
 
     *inode = inodes[index];
+    debug_print("INODE %d ***********************************\n", inr);
     return 0;
 }
 
@@ -109,15 +110,18 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
     M_REQUIRE_NON_NULL(i);
     M_REQUIRE_NON_NULL(i->i_addr);
     if (!(i->i_mode & IALLOC)) {
+        debug_print("UNNALLOCATED INODE\n%c", ' ');
         return ERR_UNALLOCATED_INODE;
     }
     int32_t isize = inode_getsize(i);
     if (file_sec_off * SECTOR_SIZE >= isize) {
+        debug_print("ERR_OFFSET_OUT_OF_RANGE: offset %d\n", file_sec_off);
         return ERR_OFFSET_OUT_OF_RANGE;
     }
 
-    if (isize <= 8*SECTOR_SIZE) {
+    if (isize <= 8 * SECTOR_SIZE) {
         //direct addressing
+        debug_print("has sector %d\n", i->i_addr[file_sec_off]);
         return i->i_addr[file_sec_off];
     } else if (isize <= 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE) {
         // indirect addressing
@@ -127,9 +131,11 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
         if (err != 0) {
             return err;
         }
+        debug_print("inode has sector %d\n", addrs[file_sec_off % ADDRESSES_PER_SECTOR]);
         return addrs[file_sec_off % ADDRESSES_PER_SECTOR];
     } else {
         // extra-large file, not handled
+        debug_print("ERR_FILE_TO_LARGE\n%c", ' ');
         return ERR_FILE_TOO_LARGE;
     }
 }
