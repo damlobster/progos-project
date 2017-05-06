@@ -28,7 +28,7 @@ struct unix_filesystem fs;
 static int fs_getattr(const char *path, struct stat *stbuf) {
     int res = 0;
 
-    memset(stbuf, 0, sizeof (struct stat));
+    memset(stbuf, 0, sizeof(struct stat));
 
     int inr = direntv6_dirlookup(&fs, 1, path);
     if (inr < 0) {
@@ -37,30 +37,32 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
     }
 
     struct inode inode;
-    int ret = inode_read(&fs, inr, &inode);
+    int ret = inode_read(&fs, (uint16_t) inr, &inode);
     if (ret < 0) {
         debug_print("fs_getattr 2: %d\n", ret);
         return ret;
     }
 
-    struct timespec atim = {inode.i_atime[0], inode.i_atime[1]};
-    stbuf->st_atim =  atim;
+    struct timespec atim = { inode.i_atime[0], inode.i_atime[1] };
+    stbuf->st_atim = atim;
     stbuf->st_blksize = SECTOR_SIZE;
     stbuf->st_blocks = inode_getsectorsize(&inode);
 
-    struct timespec ctim = {0l,0l};
+    struct timespec ctim = { 0l, 0l };
     stbuf->st_ctim = ctim;
     stbuf->st_dev = 0;
     stbuf->st_gid = inode.i_gid;
-    stbuf->st_ino = inr;
+    stbuf->st_ino = (size_t) inr;
 
     if (inode.i_mode & IFDIR) {
-        stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH | S_IFDIR;
+        stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+                | S_IFDIR;
     } else {
-        stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH | S_IFREG;
+        stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+                | S_IFREG;
     }
 
-    struct timespec mtim = {inode.i_mtime[0], inode.i_mtime[1]};
+    struct timespec mtim = { inode.i_mtime[0], inode.i_mtime[1] };
     stbuf->st_mtim = mtim;
     stbuf->st_nlink = inode.i_nlink;
     stbuf->st_rdev = 0;
@@ -72,21 +74,22 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
     return res;
 }
 
-static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+        off_t offset, struct fuse_file_info *fi) {
     (void) offset;
     (void) fi;
 
     filler(buf, ".", NULL, 0);
     filler(buf, "..", NULL, 0);
 
-    uint16_t inr = direntv6_dirlookup(&fs, 1, path);
+    int inr = direntv6_dirlookup(&fs, 1, path);
     if (inr < 0) {
         debug_print("fs_readdir 1: %d\n", inr);
         return inr;
     }
 
     struct directory_reader reader;
-    int ret = direntv6_opendir(&fs, inr, &reader);
+    int ret = direntv6_opendir(&fs, (uint16_t) inr, &reader);
     if (ret < 0) {
         debug_print("fs_readdir 2: %d\n", ret);
         return ret;
@@ -94,7 +97,8 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 
     char name[DIRENT_MAXLEN + 1];
     memset(name, 0, DIRENT_MAXLEN + 1);
-    while ((ret = direntv6_readdir(&reader, name, &inr)) > 0) {
+    uint16_t i = (uint16_t) inr;
+    while ((ret = direntv6_readdir(&reader, name, &i)) > 0) {
         filler(buf, name, NULL, 0);
     }
 
@@ -103,7 +107,8 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
     return 0;
 }
 
-static int fs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+static int fs_read(const char *path, char *buf, size_t size, off_t offset,
+        struct fuse_file_info *fi) {
     (void) fi;
 
     int inr = direntv6_dirlookup(&fs, 1, path);
@@ -127,9 +132,9 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
     sector[SECTOR_SIZE] = '\0';
     int read = 0;
     int total = 0;
-    filev6_lseek(&fv6, offset);
-    while ((read = filev6_readblock(&fv6, sector)) > 0 && total < size) {
-        memcpy(buf + total, sector, read);
+    filev6_lseek(&fv6, (int32_t) offset);
+    while ((read = filev6_readblock(&fv6, sector)) > 0 && total < (int) size) {
+        memcpy(buf + total, sector, (size_t) read);
         total += read;
     }
 
@@ -139,7 +144,8 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 /* From https://github.com/libfuse/libfuse/wiki/Option-Parsing.
  * This will look up into the args to search for the name of the FS.
  */
-static int arg_parse(void *data, const char *filename, int key, struct fuse_args *outargs) {
+static int arg_parse(void *data, const char *filename, int key,
+        struct fuse_args *outargs) {
     (void) data;
     (void) outargs;
     if (key == FUSE_OPT_KEY_NONOPT && fs.f == NULL && filename != NULL) {
@@ -153,8 +159,8 @@ static int arg_parse(void *data, const char *filename, int key, struct fuse_args
     return 1;
 }
 
-static struct fuse_operations available_ops = {.getattr = fs_getattr,
-    .readdir = fs_readdir, .read = fs_read};
+static struct fuse_operations available_ops = { .getattr = fs_getattr,
+        .readdir = fs_readdir, .read = fs_read };
 
 int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);

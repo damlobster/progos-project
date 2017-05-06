@@ -11,15 +11,15 @@ CFLAGS = -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow \
 LDFLAGS = -lcrypto
 
 debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds -DDEBUG
-debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
+#debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 
 ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c shell.c fs.c, $(ALL_SOURCES))
 SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o test-bmb.o, $(SOURCES:.c=.o))
-EXECUTABLE = test-inodes test-file test-dirent test-bmblock
+EXECUTABLE = test-inodes test-file test-dirent test-bmblock test-ibm-fbm
 
-all: $(ALL_SOURCES) $(EXECUTABLE) shell fs test-bmb
+all: $(ALL_SOURCES) $(EXECUTABLE) shell fs
 
 debug: all
 	$(info debug build!!!)
@@ -36,16 +36,10 @@ shell: $(OBJECTS) shell.o $$@.o
 	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
-	rm -rf *.o $(EXECUTABLE) shell fs test-bmb test-core
+	rm -rf *.o $(EXECUTABLE) shell fs test-core
 
 fs.o: fs.c
 	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) $(CFLAGS) -o $@ -c $<
 
 fs: fs.o
 	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)
-	
-test-bmb.o: test-bmblock.c
-	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) $(CFLAGS) -DTESTS_BITMAP -o $@ -c $<
-
-test-bmb: $(OBJECTS) test-bmb.o $$@.o
-	$(CC) $(OBJECTS) $@.o -o $@ $(LDFLAGS) 

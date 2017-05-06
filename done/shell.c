@@ -14,6 +14,7 @@
 #include "error.h"
 #include "inode.h"
 #include "sha.h"
+#include "bmblock.h"
 
 //#define DEBUG
 
@@ -253,6 +254,10 @@ int do_psb(const char** args) {
 
     mountv6_print_superblock(&u);
 
+    puts("########### IBM ##############");
+    bm_print(u.ibm);
+    puts("########### FBM ##############");
+    bm_print(u.fbm);
     return 0;
 }
 

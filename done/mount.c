@@ -39,13 +39,13 @@ void fill_fbm(struct unix_filesystem *u) {
         return;
     }
 
-    for (uint16_t i = u->s.s_inode_start; i < u->s.s_isize; i++) {
+    for (uint16_t i = 0; i < u->s.s_isize*INODES_PER_SECTOR; i++) {
         struct inode inode;
         int ret = inode_read(u, i, &inode);
         if (ret < 0) {
             continue;
         }
-
+        
         int sector;
         int offset = 0;
         while ((sector = inode_findsector(u, &inode, offset)) > 0) {
@@ -90,8 +90,6 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     u->ibm = bm_alloc(2, (uint64_t) u->s.s_isize * INODES_PER_SECTOR);
     u->fbm = bm_alloc((uint64_t) u->s.s_block_start + 1,
             (uint64_t) u->s.s_fsize);
-    //u->s.s_fbmsize = 1 + bm_sizeof(u->fbm) / SECTOR_SIZE; //FIXME nécessaire?
-    //u->s.s_ibmsize = 1 + bm_sizeof(u->ibm) / SECTOR_SIZE;
     fill_ibm(u);
     fill_fbm(u);
 

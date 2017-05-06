@@ -23,7 +23,8 @@ struct bmblock_array {
     uint64_t bm[1];
 };
 
-#define BITS_PER_VECTOR (8*sizeof(((struct bmblock_array*)0)->bm[0]))
+#define BYTES_PER_VECTOR (sizeof(((struct bmblock_array*)0)->bm[0]))
+#define BITS_PER_VECTOR (8*BYTES_PER_VECTOR)
 
 /**
  * @brief allocate a new bmblock_array to handle elements indexed
@@ -69,12 +70,12 @@ int bm_find_next(struct bmblock_array *bmblock_array);
  */
 void bm_print(struct bmblock_array *bmblock_array);
 
-/**
- * Get the size in byte of the bitmap block
- * @param bmblock_array
- * @return 0 if bmblock_array is NULL, otherwise the number of bytes
- */
-size_t bm_sizeof(struct bmblock_array * bmblock_array);
+///**
+// * Get the size in byte of the bitmap block
+// * @param bmblock_array
+// * @return 0 if bmblock_array is NULL, otherwise the number of bytes
+// */
+//size_t bm_sizeof(struct bmblock_array * bmblock_array);
 
 #ifdef __cplusplus
 }

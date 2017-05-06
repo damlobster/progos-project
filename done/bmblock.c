@@ -4,13 +4,20 @@
  * Created on: May 3, 2017
  * Author: Léonard et Damien
  */
-#include <stdlib.h>
-#include <stdio.h>
+
 #include "bmblock.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "error.h"
 
+// Return the index of to the right "word" from bm[], n is the bit number
 #define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / BITS_PER_VECTOR)
+// Return a pointer to the right "word" from bm[], n is the bit number
 #define BMB_GET_WORD(bmb, n) (bmb->bm[BMB_GET_WORD_IDX(bmb, n)])
+// Return the bit index inside a "word", n is the bit number
 #define BMB_GET_BIT_IDX(bmb, n) ((n - bmb->min) % BITS_PER_VECTOR)
 
 /**
@@ -23,10 +30,14 @@
 struct bmblock_array *bm_alloc(uint64_t min, uint64_t max) {
     if (min > max) return NULL;
     uint64_t nb_bits = max - min + 1;
-    struct bmblock_array* bmb = calloc(1,
-            sizeof(struct bmblock_array) + (nb_bits / BITS_PER_VECTOR));
+    size_t size = sizeof(struct bmblock_array)
+            + (nb_bits / BITS_PER_VECTOR) * BYTES_PER_VECTOR;
+    struct bmblock_array* bmb = calloc(1, size);
+    if(bmb==NULL){
+        return NULL;
+    }
     bmb->cursor = 0;
-    bmb->length = nb_bits / BITS_PER_VECTOR + 1;
+    bmb->length = (nb_bits / BITS_PER_VECTOR) + (nb_bits % BITS_PER_VECTOR > 0);
     bmb->min = min;
     bmb->max = max;
     return bmb;
@@ -58,10 +69,11 @@ void bm_set(struct bmblock_array *bmblock_array, uint64_t x) {
     BMB_GET_WORD(bmblock_array, x) |= UINT64_C(
             1) << BMB_GET_BIT_IDX(bmblock_array, x);
 
-    if (bmblock_array->cursor == BMB_GET_WORD_IDX(bmblock_array, x)
-            && BMB_GET_WORD(bmblock_array, x) == UINT64_MAX) {
-        bmblock_array->cursor++;
-    }
+    //useless
+    //if (bmblock_array->cursor == BMB_GET_WORD_IDX(bmblock_array, x)
+    //        && BMB_GET_WORD(bmblock_array, x) == UINT64_MAX) {
+    //    bmblock_array->cursor++;
+    //}
 }
 
 /**
@@ -88,8 +100,8 @@ void bm_clear(struct bmblock_array *bmblock_array, uint64_t x) {
 int bm_find_next(struct bmblock_array *bmblock_array) {
     M_REQUIRE_NON_NULL(bmblock_array);
 
-    while (bmblock_array->bm[bmblock_array->cursor] == UINT64_C(-1)
-            && bmblock_array->cursor <= bmblock_array->length) {
+    while (bmblock_array->bm[bmblock_array->cursor] == UINT64_MAX
+            && bmblock_array->cursor < bmblock_array->length) {
         //update cursor if current BITS_PER_VECTOR bits are used
         bmblock_array->cursor++;
     }
@@ -99,7 +111,11 @@ int bm_find_next(struct bmblock_array *bmblock_array) {
     }
 
     unsigned char n;
-    for (n = 0; n < 63 && //
+    uint64_t last_bit = BITS_PER_VECTOR - 1;
+    if (bmblock_array->cursor == bmblock_array->length - 1) {
+        last_bit = (bmblock_array->max - bmblock_array->min) % BITS_PER_VECTOR;
+    }
+    for (n = 0; n < last_bit && //
             (bmblock_array->bm[bmblock_array->cursor] & (UINT64_C(1) << n));
             n++) {
     }

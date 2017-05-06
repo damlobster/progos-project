@@ -111,15 +111,15 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
     if (!(i->i_mode & IALLOC)) {
         return ERR_UNALLOCATED_INODE;
     }
-
-    int32_t size_in_sec = (inode_getsize(i) / SECTOR_SIZE);
-
-    if (file_sec_off > size_in_sec) {
+    int32_t isize = inode_getsize(i);
+    if (file_sec_off * SECTOR_SIZE >= isize) {
         return ERR_OFFSET_OUT_OF_RANGE;
-    } else if (size_in_sec <= 8) {
+    }
+
+    if (isize <= 8*SECTOR_SIZE) {
         //direct addressing
         return i->i_addr[file_sec_off];
-    } else if (size_in_sec < 7 * ADDRESSES_PER_SECTOR) {
+    } else if (isize <= 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE) {
         // indirect addressing
         int16_t addrs[ADDRESSES_PER_SECTOR];
         int err = sector_read(u->f,
