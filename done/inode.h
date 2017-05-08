@@ -15,6 +15,9 @@
 extern "C" {
 #endif
 
+#define INODE_SMALL_FILE 8 * SECTOR_SIZE
+#define INODE_EXTRA_LARGE_FILE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
+
 /**
  * @brief Return the size of a given inode.
  *

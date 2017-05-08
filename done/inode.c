@@ -119,11 +119,11 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
         return ERR_OFFSET_OUT_OF_RANGE;
     }
 
-    if (isize <= 8 * SECTOR_SIZE) {
+    if (isize <= INODE_SMALL_FILE) {
         //direct addressing
         debug_print("has sector %d\n", i->i_addr[file_sec_off]);
         return i->i_addr[file_sec_off];
-    } else if (isize <= 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE) {
+    } else if (isize <= INODE_EXTRA_LARGE_FILE) {
         // indirect addressing
         int16_t addrs[ADDRESSES_PER_SECTOR];
         int err = sector_read(u->f,
