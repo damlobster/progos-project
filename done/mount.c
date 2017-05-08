@@ -39,13 +39,21 @@ void fill_fbm(struct unix_filesystem *u) {
         return;
     }
 
-    for (uint16_t i = 0; i < u->s.s_isize*INODES_PER_SECTOR; i++) {
+    for (uint16_t i = 0; i < u->s.s_isize * INODES_PER_SECTOR; i++) {
         struct inode inode;
         int ret = inode_read(u, i, &inode);
         if (ret < 0) {
             continue;
         }
-        
+        int32_t isize = inode_getsize(&inode);
+        if (isize > INODE_SMALL_FILE && isize <= INODE_EXTRA_LARGE_FILE) {
+            for (int j = 0; j <= isize / (SECTOR_SIZE * ADDRESSES_PER_SECTOR);
+                    j++) {
+                debug_print("INDIRECT SECTOR %d USED\n", inode.i_addr[j]);
+                bm_set(u->fbm, inode.i_addr[j]);
+            }
+        }
+
         int sector;
         int offset = 0;
         while ((sector = inode_findsector(u, &inode, offset)) > 0) {
