@@ -30,14 +30,14 @@
 struct bmblock_array *bm_alloc(uint64_t min, uint64_t max) {
     if (min > max) return NULL;
     uint64_t nb_bits = max - min + 1;
-    size_t size = sizeof(struct bmblock_array)
-            + (nb_bits / BITS_PER_VECTOR) * BYTES_PER_VECTOR;
+    uint64_t bm_length = (nb_bits / BITS_PER_VECTOR) + (nb_bits % BITS_PER_VECTOR > 0);
+    size_t size = sizeof(struct bmblock_array) + (bm_length-1) * BYTES_PER_VECTOR;
     struct bmblock_array* bmb = calloc(1, size);
     if(bmb==NULL){
         return NULL;
     }
     bmb->cursor = 0;
-    bmb->length = (nb_bits / BITS_PER_VECTOR) + (nb_bits % BITS_PER_VECTOR > 0);
+    bmb->length = bm_length;
     bmb->min = min;
     bmb->max = max;
     return bmb;
