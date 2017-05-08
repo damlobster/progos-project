@@ -1,9 +1,10 @@
-#include <stdint.h>
+#include "direntv6.h"
+
+#include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "direntv6.h"
 #include "error.h"
-#include "unixv6fs.h"
 #include "inode.h"
 
 #define MAXPATHLEN_UV6 1024 // max size in chars of a path

@@ -14,54 +14,17 @@
 #include "unixv6fs.h"
 #include "inode.h"
 
-void fill_ibm(struct unix_filesystem *u) {
-    if (u == NULL) {
-        return;
-    }
-    // loop on all inode sectors
-    for (uint32_t k = 0; k < u->s.s_isize; k++) {
-        struct inode inodes[INODES_PER_SECTOR];
-        int error = sector_read(u->f, u->s.s_inode_start + k, inodes);
+/**
+ * Fill the inodes bitmap
+ * @param u the opened file system, not NULL
+ */
+void fill_ibm(struct unix_filesystem *u);
 
-        // loop on all inode of the current sector
-        for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
-            if (error != 0) {
-                bm_set(u->ibm, k * INODES_PER_SECTOR + i); //FIXME pas sûr
-            } else if (inodes[i].i_mode & IALLOC) {
-                bm_set(u->ibm, k * INODES_PER_SECTOR + i);
-            }
-        }
-    }
-}
-
-void fill_fbm(struct unix_filesystem *u) {
-    if (u == NULL) {
-        return;
-    }
-
-    for (uint16_t i = 0; i < u->s.s_isize * INODES_PER_SECTOR; i++) {
-        struct inode inode;
-        int ret = inode_read(u, i, &inode);
-        if (ret < 0) {
-            continue;
-        }
-        int32_t isize = inode_getsize(&inode);
-        if (isize > INODE_SMALL_FILE && isize <= INODE_EXTRA_LARGE_FILE) {
-            for (int j = 0; j <= isize / (SECTOR_SIZE * ADDRESSES_PER_SECTOR);
-                    j++) {
-                debug_print("INDIRECT SECTOR %d USED\n", inode.i_addr[j]);
-                bm_set(u->fbm, inode.i_addr[j]);
-            }
-        }
-
-        int sector;
-        int offset = 0;
-        while ((sector = inode_findsector(u, &inode, offset)) > 0) {
-            bm_set(u->fbm, (uint64_t) sector);
-            offset++;
-        }
-    }
-}
+/**
+ * Fill the sectors bitmap
+ * @param u the opened file system, not NULL
+ */
+void fill_fbm(struct unix_filesystem *u);
 
 /**
  * @brief  mount a unix v6 filesystem
@@ -147,4 +110,53 @@ int umountv6(struct unix_filesystem * u) {
     }
 
     return 0;
+}
+
+void fill_ibm(struct unix_filesystem *u) {
+    if (u == NULL) {
+        return;
+    }
+    // loop on all inode sectors
+    for (uint32_t k = 0; k < u->s.s_isize; k++) {
+        struct inode inodes[INODES_PER_SECTOR];
+        int error = sector_read(u->f, u->s.s_inode_start + k, inodes);
+
+        // loop on all inode of the current sector
+        for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
+            if (error != 0) {
+                bm_set(u->ibm, k * INODES_PER_SECTOR + i); //FIXME pas sûr
+            } else if (inodes[i].i_mode & IALLOC) {
+                bm_set(u->ibm, k * INODES_PER_SECTOR + i);
+            }
+        }
+    }
+}
+
+void fill_fbm(struct unix_filesystem *u) {
+    if (u == NULL) {
+        return;
+    }
+
+    for (uint16_t i = 0; i < u->s.s_isize * INODES_PER_SECTOR; i++) {
+        struct inode inode;
+        int ret = inode_read(u, i, &inode);
+        if (ret < 0) {
+            continue;
+        }
+        int32_t isize = inode_getsize(&inode);
+        if (isize > INODE_SMALL_FILE && isize <= INODE_EXTRA_LARGE_FILE) {
+            for (int j = 0; j <= isize / (SECTOR_SIZE * ADDRESSES_PER_SECTOR);
+                    j++) {
+                debug_print("INDIRECT SECTOR %d USED\n", inode.i_addr[j]);
+                bm_set(u->fbm, inode.i_addr[j]);
+            }
+        }
+
+        int sector;
+        int offset = 0;
+        while ((sector = inode_findsector(u, &inode, offset)) > 0) {
+            bm_set(u->fbm, (uint64_t) sector);
+            offset++;
+        }
+    }
 }

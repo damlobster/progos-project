@@ -8,9 +8,10 @@
  * @date summer 2016
  */
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
