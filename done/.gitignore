@@ -6,5 +6,5 @@
 /test-dirent
 /shell
 /fs
-/test-bmblock
+/test-bitmap
 /test-ibm-fbm
