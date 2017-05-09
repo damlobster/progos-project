@@ -4,11 +4,13 @@
  *  Created on: Mar 15, 2017
  *  Authors: Léonard Berney & Damien Martin
  */
+#include <string.h>
 
 #include "filev6.h"
 #include "error.h"
 #include "inode.h"
 #include "sector.h"
+#include "unixv6fs.h"
 
 /**
  * @brief open up a file corresponding to a given inode; set offset to zero
@@ -19,8 +21,8 @@
  */
 int filev6_open(const struct unix_filesystem *u, uint16_t inr,
         struct filev6 *fv6) {
-    M_REQUIRE_NON_NULL(fv6);
     M_REQUIRE_NON_NULL(u);
+    M_REQUIRE_NON_NULL(fv6);
 
     fv6->u = u;
     fv6->i_number = inr;
@@ -51,7 +53,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         return sector; // inode not allocated or error
     }
 
-    int error = sector_read(fv6->u->f, (uint32_t)sector, buf);
+    int error = sector_read(fv6->u->f, (uint32_t) sector, buf);
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;
@@ -75,7 +77,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
  * @param off the new offset of the file
  * @return 0 on success; <0 on errror
  */
-int filev6_lseek(struct filev6 *fv6, int32_t offset){
+int filev6_lseek(struct filev6 *fv6, int32_t offset) {
     M_REQUIRE_NON_NULL(fv6);
     int32_t size = inode_getsize(&fv6->i_node);
     if (offset > size) {
@@ -83,5 +85,40 @@ int filev6_lseek(struct filev6 *fv6, int32_t offset){
     }
     fv6->offset = offset;
     return 0;
+
+}
+
+/**
+ * @brief create a new filev6
+ * @param u the filesystem (IN)
+ * @param mode the new offset of the file
+ * @param fv6 the filev6 (IN-OUT; offset will be changed)
+ * @return 0 on success; <0 on errror
+ */
+int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) {
+    M_REQUIRE_FS_MOUNTED(u);
+    M_REQUIRE_NON_NULL(fv6);
+
+    if (u->s.s_inode_start > fv6->i_number) {
+        return ERR_INODE_OUTOF_RANGE;
+    }
+
+    fv6->i_node.i_mode = mode; //FIXME validate modes !?
+    fv6->i_node.i_nlink = 0;
+    fv6->i_node.i_uid = 0;
+    fv6->i_node.i_gid = 0;
+    fv6->i_node.i_size0 = 0;
+    fv6->i_node.i_size1 = 0;
+    memset(fv6->i_node.i_addr, 0, ADDR_SMALL_LENGTH * sizeof(fv6->i_node.i_addr[0]));
+    memset(fv6->i_node.i_atime, 0, 2 * sizeof(fv6->i_node.i_atime[0]));
+    memset(fv6->i_node.i_mtime, 0, 2 * sizeof(fv6->i_node.i_mtime[0]));
+
+    int err = inode_write(u, fv6->i_number, &fv6->i_node);
+    if(err!=0){
+        return err;
+    }
+
+    return 0;
+
 
 }

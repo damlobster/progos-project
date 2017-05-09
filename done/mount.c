@@ -138,7 +138,7 @@ void fill_fbm(struct unix_filesystem *u) {
     }
 
     for (uint16_t i = 0; i < u->s.s_isize * INODES_PER_SECTOR; i++) {
-        struct inode inode;
+        struct inode inode = {0};
         int ret = inode_read(u, i, &inode);
         if (ret < 0) {
             continue;

@@ -59,6 +59,11 @@ enum error_codes {
         } \
     } while(0)
 
+#define M_REQUIRE_FS_MOUNTED(u) \
+    do{ \
+        M_REQUIRE_NON_NULL(u); \
+        M_REQUIRE_NON_NULL(u->f); \
+    } while(0)
 /**
 * @brief filesystem internal error messages. defined in error.c
 *

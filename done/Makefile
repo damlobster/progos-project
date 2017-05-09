@@ -10,14 +10,14 @@ CFLAGS = -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow \
 -Wunreachable-code
 LDFLAGS = -lcrypto
 
-debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds -DDEBUG
-#debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
+debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds #-DDEBUG -fsanitize=null,leak,bounds,address,undefined -fPIE -pie
+#debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined -fPIE -pie
 
 ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c shell.c fs.c, $(ALL_SOURCES))
 SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o test-bmb.o, $(SOURCES:.c=.o))
-EXECUTABLE = test-inodes test-file test-dirent test-bmblock test-ibm-fbm
+EXECUTABLE = test-inodes test-file test-dirent test-bitmap test-ibm-fbm
 
 all: $(ALL_SOURCES) $(EXECUTABLE) shell fs
 

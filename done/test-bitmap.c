@@ -7,9 +7,11 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "bmblock.h"
 #include "error.h"
+#include "mount.h"
 
 /**
  * Tests for the bitmap API.
@@ -46,5 +48,6 @@ int test(struct unix_filesystem *u) {
     bm_print(bm);
     printf("find_next() = %d\n", bm_find_next(bm));
 
+    free(bm);
     return 0;
 }

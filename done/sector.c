@@ -20,8 +20,7 @@
 int sector_read(FILE *f, uint32_t sector, void *data) {
     M_REQUIRE_NON_NULL(f);
     M_REQUIRE_NON_NULL(data);
-    if (sector > UINT16_MAX)
-    	return ERR_BAD_PARAMETER;
+    if (sector > UINT16_MAX) return ERR_BAD_PARAMETER;
 
     if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
         return ERR_IO;
@@ -34,3 +33,17 @@ int sector_read(FILE *f, uint32_t sector, void *data) {
     return 0;
 }
 
+/**
+ * @brief read one 512-byte sector from the virtual disk
+ * @param f open file of the virtual disk
+ * @param sector the location (in sector units, not bytes) within the virtual disk
+ * @param data a pointer to 512-bytes of memory (IN)
+ * @return 0 on success; <0 on error
+ */
+int sector_write(FILE *f, uint32_t sector, void *data) {
+    M_REQUIRE_NON_NULL(f);
+    M_REQUIRE_NON_NULL(data);
+
+    int cnt = fwrite(data, sector * SECTOR_SIZE, 1, f);
+    return cnt != SECTOR_SIZE ? ERR_IO : 0;
+}

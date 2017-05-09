@@ -17,6 +17,8 @@ extern "C" {
 
 #define INODE_SMALL_FILE 8 * SECTOR_SIZE
 #define INODE_EXTRA_LARGE_FILE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
+#define M_INODE_GET_SECTOR_ADDR(u, inr) (u->s.s_inode_start + (uint32_t)(inr / INODES_PER_SECTOR))
+#define M_INODE_GET_INDEX_IN_SECTOR(inr) (inr % INODES_PER_SECTOR)
 
 /**
  * @brief Return the size of a given inode.
