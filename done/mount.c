@@ -38,7 +38,7 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
 
     memset(u, 0, sizeof(*u));
 
-    u->f = fopen(filename, "r"); //FIXME rw?
+    u->f = fopen(filename, "rwb"); //FIXME rw?
     if (u->f == NULL) {
         return ERR_IO;
     }
@@ -124,7 +124,7 @@ void fill_ibm(struct unix_filesystem *u) {
         // loop on all inode of the current sector
         for (unsigned int i = 0; i < INODES_PER_SECTOR; i++) {
             if (error != 0) {
-                bm_set(u->ibm, k * INODES_PER_SECTOR + i); //FIXME pas sûr
+                bm_set(u->ibm, k * INODES_PER_SECTOR + i);
             } else if (inodes[i].i_mode & IALLOC) {
                 bm_set(u->ibm, k * INODES_PER_SECTOR + i);
             }
@@ -159,4 +159,28 @@ void fill_fbm(struct unix_filesystem *u) {
             offset++;
         }
     }
+}
+
+int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes) {
+    struct superblock sb = {0};
+    
+    sb.s_isize = num_inodes / INODES_PER_SECTOR;
+    sb.s_fsize = num_blocks;
+    
+    if (sb.s_fsize < num_inodes + sb.s_isize) {
+        return ERR_NOT_ENOUGH_BLOCS;
+    }
+    
+    sb.s_inode_start = SUPERBLOCK_SECTOR + 1;
+    sb.s_block_start = sb.s_inode_start + sb.s_isize + 1;
+    
+    FILE* f = fopen(filename, "rwb");
+    if (f == NULL) {
+        return ERR_IO;
+    }
+    
+    uint8_t b_block[SECTOR_SIZE];
+    memset(b_block, 0, SECTOR_SIZE);
+    b_block[BOOTBLOCK_MAGIC_NUM_OFFSET] = BOOTBLOCK_MAGIC_NUM;
+    sector_write(f, 0, b_block);
 }
