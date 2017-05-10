@@ -17,9 +17,9 @@ ALL_SOURCES = $(wildcard *.c)
 SOURCES = $(filter-out test-%.c shell.c fs.c, $(ALL_SOURCES))
 SOURCES += test-core.c
 OBJECTS = $(filter-out test-core.o shell.o test-bmb.o, $(SOURCES:.c=.o))
-EXECUTABLE = test-inodes test-file test-dirent test-bitmap test-ibm-fbm test-inodes-create
+EXECUTABLE = test-inodes test-file test-dirent test-ibm-fbm test-inodes-create
 
-all: $(ALL_SOURCES) $(EXECUTABLE) shell fs
+all: $(ALL_SOURCES) $(EXECUTABLE) shell fs test-bitmap
 
 debug: all
 	$(info debug build!!!)
@@ -36,7 +36,7 @@ shell: $(OBJECTS) shell.o $$@.o
 	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
-	rm -rf *.o $(EXECUTABLE) shell fs test-core
+	rm -rf *.o $(EXECUTABLE) shell fs test-core test-bitmap
 	
 clean-disks: 
 	cp -f ../provided/disks/* disks/
@@ -46,3 +46,9 @@ fs.o: fs.c
 
 fs: fs.o
 	$(CC) $(OBJECTS) $(LDFLAGS) $@.o -o $@ $$(pkg-config fuse --libs)
+
+test-bitmap.o: test-bitmap.c
+	$(CC) -D_DEFAULT_SOURCE $(CFLAGS) -o $@ -c $<
+
+test-bitmap: test-bitmap.o
+	$(CC) bmblock.o $(LDFLAGS) $@.o -o $@

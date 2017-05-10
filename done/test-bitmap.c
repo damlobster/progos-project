@@ -16,12 +16,9 @@
 /**
  * Tests for the bitmap API.
  *
- * @param u unused here
  * @return 0;
  */
-int test(struct unix_filesystem *u) {
-    (void) u;
-
+int main() {
     struct bmblock_array *bm = bm_alloc(4, 131);
     if (NULL == bm) {
         return ERR_NOMEM;
