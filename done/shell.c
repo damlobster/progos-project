@@ -301,14 +301,14 @@ int do_mount(const char** args) {
  */
 int do_mkfs(const char** args) {
     long int in = strtol(args[1], NULL, 10);
-    if(in<0 || in > UINT16_MAX){
+    if (in < 0 || in > UINT16_MAX) {
         return ERR_BAD_PARAMETER;
     }
     long int sn = strtol(args[2], NULL, 10);
-    if(sn<0 || sn > UINT16_MAX){
-            return ERR_BAD_PARAMETER;
-        }
-    int err = mountv6_mkfs(args[0], (uint16_t)in, (uint16_t)sn);
+    if (sn < 0 || sn > UINT16_MAX) {
+        return ERR_BAD_PARAMETER;
+    }
+    int err = mountv6_mkfs(args[0], (uint16_t) in, (uint16_t) sn);
     if (err < 0) {
         return err;
     }
@@ -322,7 +322,11 @@ int do_mkfs(const char** args) {
  * @return
  */
 int do_mkdir(const char** args) {
-    return SHELL_NOT_IMPLEMENTED;
+    int err = direntv6_create(u, args[0], IFDIR);
+    if (err < 0) {
+        return err;
+    }
+    return 0;
 }
 
 /**

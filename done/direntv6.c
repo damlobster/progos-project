@@ -204,15 +204,41 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         return err;
     }
 
-    char child[MAXPATHLEN_UV6 + 1];
-    memset(child, MAXPATHLEN_UV6 + 1, child);
+    if (direntv6_dirlookup(u, 1, parent) < 0) {
+        return ERR_BAD_PARAMETER;
+    }
+
+    char child[DIRENT_MAXLEN + 1];
+    memset(child, DIRENT_MAXLEN + 1, child);
     err = extract_child(entry, child);
     if (err < 0) {
         return err;
     }
-    
+
     int inr = inode_alloc(u);
     if (inr < 0) {
         return inr;
     }
+
+    struct inode inode = {0};
+    inode.i_mode = mode & IALLOC;
+
+    err = inode_write(u, inr, &inode);
+    if (err < 0) {
+        return err;
+    }
+
+    struct filev6 fv6;
+    ;
+    fv6.i_node = inode;
+    fv6.i_number = inr;
+    fv6.offset = 0;
+    fv6.u = u;
+
+    err = filev6_writebytes(u, &fv6, NULL, NULL);
+    if (err < 0) {
+        return err;
+    }
+
+    return 0;
 }
