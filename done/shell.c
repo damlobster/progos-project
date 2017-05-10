@@ -300,7 +300,15 @@ int do_mount(const char** args) {
  * @return
  */
 int do_mkfs(const char** args) {
-    int err = mountv6_mkfs(args[0], strtol(args[1], NULL, 10), strtol(args[2], NULL, 10));
+    long int in = strtol(args[1], NULL, 10);
+    if(in<0 || in > UINT16_MAX){
+        return ERR_BAD_PARAMETER;
+    }
+    long int sn = strtol(args[2], NULL, 10);
+    if(sn<0 || sn > UINT16_MAX){
+            return ERR_BAD_PARAMETER;
+        }
+    int err = mountv6_mkfs(args[0], (uint16_t)in, (uint16_t)sn);
     if (err < 0) {
         return err;
     }
