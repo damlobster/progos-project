@@ -300,7 +300,12 @@ int do_mount(const char** args) {
  * @return
  */
 int do_mkfs(const char** args) {
-    return SHELL_NOT_IMPLEMENTED;
+    int err = mountv6_mkfs(args[0], strtol(args[1], NULL, 10), strtol(args[2], NULL, 10));
+    if (err < 0) {
+        return err;
+    }
+
+    return 0;
 }
 
 /**
