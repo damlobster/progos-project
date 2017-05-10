@@ -20,6 +20,7 @@
  */
 int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
         struct inode *inodes);
+
 /**
  * @brief read all inodes from disk and print out their content to
  *        stdout according to the assignment
@@ -43,8 +44,8 @@ int inode_scan_print(const struct unix_filesystem *u) {
                 // inode is allocated --> print it
                 int size = inode_getsize(&inodes[i]);
                 const char *type = (inodes[i].i_mode & IFDIR) ?
-                SHORT_DIR_NAME :
-                                                                SHORT_FIL_NAME;
+                        SHORT_DIR_NAME :
+                        SHORT_FIL_NAME;
                 printf("inode %3zu (%s) len %4d\n",
                         i + (k - 2) * INODES_PER_SECTOR, type, size);
             }
@@ -187,4 +188,14 @@ int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
 
     int error = sector_read(u->f, (uint16_t) sector_to_read, inodes);
     return error; // propagate sector_read error
+}
+
+int inode_alloc(unix_filesystem* u) {
+    int inr = bm_find_next(u->ibm);
+    if (inr < 0) {
+        return inr;
+    }
+    bm_set(u->ibm, inr);
+
+    return inr;
 }
