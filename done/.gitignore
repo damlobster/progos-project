@@ -8,3 +8,5 @@
 /fs
 /test-bitmap
 /test-ibm-fbm
+/test-inodes-create
+
