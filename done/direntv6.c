@@ -183,3 +183,36 @@ int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
     return direntv6_dirlookup_core(u, inr, entry);
 
 }
+
+int extract_parent(const char* entry, char* out) {
+
+}
+
+int extract_child(const char* entry, char* out) {
+
+}
+
+int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode) {
+    if (direntv6_dirlookup(u, 1, entry) == 0) {
+        return ERR_FILENAME_ALREADY_EXISTS;
+    }
+
+    char parent[MAXPATHLEN_UV6 + 1];
+    memset(parent, 0, MAXPATHLEN_UV6 + 1);
+    int err = extract_parent(entry, parent);
+    if (err < 0) {
+        return err;
+    }
+
+    char child[MAXPATHLEN_UV6 + 1];
+    memset(child, MAXPATHLEN_UV6 + 1, child);
+    err = extract_child(entry, child);
+    if (err < 0) {
+        return err;
+    }
+    
+    int inr = inode_alloc(u);
+    if (inr < 0) {
+        return inr;
+    }
+}
