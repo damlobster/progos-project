@@ -190,12 +190,12 @@ int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
     return error; // propagate sector_read error
 }
 
-int inode_alloc(unix_filesystem* u) {
+int inode_alloc(struct unix_filesystem* u) {
     int inr = bm_find_next(u->ibm);
     if (inr < 0) {
         return inr;
     }
-    bm_set(u->ibm, inr);
+    bm_set(u->ibm, (uint64_t)inr);
 
     return inr;
 }

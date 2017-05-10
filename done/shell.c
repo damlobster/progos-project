@@ -322,7 +322,7 @@ int do_mkfs(const char** args) {
  * @return
  */
 int do_mkdir(const char** args) {
-    int err = direntv6_create(u, args[0], IFDIR);
+    int err = direntv6_create(&u, args[0], IFDIR);
     if (err < 0) {
         return err;
     }
