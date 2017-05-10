@@ -193,7 +193,7 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     char parent[MAXPATHLEN_UV6 + 1];
     memset(parent, 0, MAXPATHLEN_UV6 + 1);
     char child[DIRENT_MAXLEN + 1];
-    memset(child, DIRENT_MAXLEN + 1, child);
+    memset(child, 0, DIRENT_MAXLEN + 1);
 
     size_t i = strlen(entry);
 
@@ -204,7 +204,7 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     while (i != 0 && entry[--i] != '/')
         ;
 
-    if (i == 0) {
+    if (i == 0 && entry[i] != '/') {
         return ERR_BAD_PARAMETER;
     }
     strncpy(parent, entry, i);
@@ -220,7 +220,7 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     if (flen > DIRENT_MAXLEN) {
         return ERR_FILENAME_TOO_LONG;
     }
-    strncpy(child, entry[i], DIRENT_MAXLEN);
+    strncpy(child, &entry[i+1], DIRENT_MAXLEN);
 
     int inr = inode_alloc(u);
     if (inr < 0) {
@@ -228,20 +228,20 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     }
 
     struct inode inode = { 0 };
-    inode.i_mode = mode & IALLOC;
+    inode.i_mode = mode | IALLOC;
 
-    int err = inode_write(u, inr, &inode);
+    int err = inode_write(u, (uint16_t)inr, &inode);
     if (err < 0) {
         return err;
     }
 
     struct filev6 fv6;
     fv6.i_node = inode;
-    fv6.i_number = inr;
+    fv6.i_number = (uint16_t)inr;
     fv6.offset = 0;
     fv6.u = u;
 
-    //err = filev6_writebytes(u, &fv6, NULL, NULL);
+    err = filev6_writebytes(u, &fv6, NULL, 0);
     if (err < 0) {
         return err;
     }

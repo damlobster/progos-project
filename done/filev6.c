@@ -119,6 +119,18 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
     }
 
     return 0;
-
-
 }
+
+/**
+ * @brief write the len bytes of the given buffer on disk to the given filev6
+ * @param u the filesystem (IN)
+ * @param fv6 the filev6 (IN)
+ * @param buf the data we want to write (IN)
+ * @param len the length of the bytes we want to write
+ * @return 0 on success; <0 on errror
+ */
+int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
+    debug_print("filev6_writebytes(%d)", len);
+    return 0;
+}
+
