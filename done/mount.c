@@ -36,9 +36,9 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(filename);
     M_REQUIRE_NON_NULL(u);
 
-    memset(u, 0, sizeof(*u));
+    memset(u, 0, sizeof (*u));
 
-    u->f = fopen(filename, "rwb"); //FIXME rw?
+    u->f = fopen(filename, "rb+"); //FIXME rw?
     if (u->f == NULL) {
         return ERR_IO;
     }
@@ -163,24 +163,49 @@ void fill_fbm(struct unix_filesystem *u) {
 
 int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes) {
     struct superblock sb = {0};
-    
+
     sb.s_isize = num_inodes / INODES_PER_SECTOR;
     sb.s_fsize = num_blocks;
-    
+
     if (sb.s_fsize < num_inodes + sb.s_isize) {
         return ERR_NOT_ENOUGH_BLOCS;
     }
-    
+
     sb.s_inode_start = SUPERBLOCK_SECTOR + 1;
     sb.s_block_start = sb.s_inode_start + sb.s_isize + 1;
-    
-    FILE* f = fopen(filename, "rwb");
+
+    FILE* f = fopen(filename, "wb+");
     if (f == NULL) {
         return ERR_IO;
     }
-    
+
     uint8_t b_block[SECTOR_SIZE];
     memset(b_block, 0, SECTOR_SIZE);
     b_block[BOOTBLOCK_MAGIC_NUM_OFFSET] = BOOTBLOCK_MAGIC_NUM;
-    sector_write(f, 0, b_block);
+
+    int err = sector_write(f, 0, b_block);
+    if (err < 0) {
+        return err;
+    }
+    err = sector_write(f, 1, &sb);
+    if (err < 0) {
+        return err;
+    }
+
+    struct inode root = {0};
+    root.i_mode = IALLOC & IFDIR;
+    err = sector_write(f, sb.s_inode_start, &root);
+    if (err < 0) {
+        return err;
+    }
+
+    for (int i = sb.s_inode_start; i < sb.s_block_start - 1; i++) {
+        struct inode inode = {0};
+        err = sector_write(f, i, &inode);
+        if (err < 0) {
+            return err;
+        }
+    }
+
+    return 0;
 }
