@@ -29,7 +29,7 @@ struct bmblock_array {
 
 /**
  * @brief allocate a new bmblock_array to handle elements indexed
- * between min and may (included, thus (max-min+1) elements).
+ * between min and max (included, thus (max-min+1) elements).
  * @param min the mininum value supported by our bmblock_array
  * @param max the maxinum value supported by our bmblock_array
  * @return a pointer of the newly created bmblock_array or NULL on failure

@@ -153,7 +153,7 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
  * @param inode the inode structure, read from disk (IN)
  * @return 0 on success; <0 on error
  */
-int inode_write(struct unix_filesystem *u, uint16_t inr, struct inode *inode) {
+int inode_write(struct unix_filesystem *u, uint16_t inr, const struct inode *inode) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
 

@@ -4,6 +4,7 @@
  *  Created on: Mar 13, 2017
  *      Author: Damien & Léonard
  */
+#include <stdio.h>
 
 #include "sector.h"
 
@@ -20,7 +21,6 @@
 int sector_read(FILE *f, uint32_t sector, void *data) {
     M_REQUIRE_NON_NULL(f);
     M_REQUIRE_NON_NULL(data);
-    if (sector > UINT16_MAX) return ERR_BAD_PARAMETER;
 
     if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
         return ERR_IO;
@@ -40,10 +40,17 @@ int sector_read(FILE *f, uint32_t sector, void *data) {
  * @param data a pointer to 512-bytes of memory (IN)
  * @return 0 on success; <0 on error
  */
-int sector_write(FILE *f, uint32_t sector, void *data) {
+int sector_write(FILE *f, uint32_t sector, const void *data) {
     M_REQUIRE_NON_NULL(f);
     M_REQUIRE_NON_NULL(data);
 
-    int cnt = fwrite(data, sector * SECTOR_SIZE, 1, f);
-    return cnt != SECTOR_SIZE ? ERR_IO : 0;
+    if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
+        return ERR_IO;
+    }
+    size_t len = fwrite(data, SECTOR_SIZE, 1, f);
+    if (len != 1) {
+        return ERR_IO;
+    }
+
+    return 0;
 }
