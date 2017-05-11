@@ -443,7 +443,7 @@ int main(void) {
                 puts("Command not found! Type 'help' to display available commands.");
             } else {
                 if ((size_t) n != cmd->argc) {
-                    printf("wrong number of arguments, usage: %s", cmd->help);
+                    printf("wrong number of arguments, usage: %s\n", cmd->help);
                 } else {
                     result = cmd->fct(&args[1]);
                 }

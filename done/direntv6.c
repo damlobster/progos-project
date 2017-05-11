@@ -102,7 +102,7 @@ int direntv6_readdir(struct directory_reader *d, char *name,
         if (read <= 0) return read; // an error occured
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
-        d->last += read / sizeof(struct direntv6);
+        d->last += read / sizeof (struct direntv6);
 #pragma GCC diagnostic pop
     }
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
@@ -186,8 +186,12 @@ int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
 }
 
 int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode) {
-    if (direntv6_dirlookup(u, 1, entry) == 0) {
+    if (direntv6_dirlookup(u, 1, entry) > 0) {
         return ERR_FILENAME_ALREADY_EXISTS;
+    }
+
+    if (strlen(entry) > MAXPATHLEN_UV6 || entry[0] != '/') {
+        return ERR_BAD_PARAMETER;
     }
 
     char parent[MAXPATHLEN_UV6 + 1];
@@ -195,49 +199,40 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     char child[DIRENT_MAXLEN + 1];
     memset(child, 0, DIRENT_MAXLEN + 1);
 
-    size_t i = strlen(entry);
-
-    if (i == 0 || i > MAXPATHLEN_UV6) {
+    char* last_slash = strrchr(entry, '/');
+    if (last_slash == NULL || strlen(last_slash) == 1) {
         return ERR_BAD_PARAMETER;
     }
 
-    while (i != 0 && entry[--i] != '/')
-        ;
-
-    if (i == 0 && entry[i] != '/') {
-        return ERR_BAD_PARAMETER;
-    }
-    strncpy(parent, entry, i);
-
+    strncpy(parent, entry, last_slash - entry + 1);
     if (direntv6_dirlookup(u, 1, parent) < 0) {
         return ERR_BAD_PARAMETER;
     }
 
-    size_t flen = strlen(&entry[i + 1]);
-    if (flen == 0) {
-        return ERR_BAD_PARAMETER;
-    }
-    if (flen > DIRENT_MAXLEN) {
+    if (strlen(child) > DIRENT_MAXLEN) {
         return ERR_FILENAME_TOO_LONG;
     }
-    strncpy(child, &entry[i+1], DIRENT_MAXLEN);
+    strncpy(child, last_slash + 1, strlen(last_slash) - 1);
+
+    debug_print("parent: %s\n", parent);
+    debug_print("child: %s\n", child);
 
     int inr = inode_alloc(u);
     if (inr < 0) {
         return inr;
     }
 
-    struct inode inode = { 0 };
+    struct inode inode = {0};
     inode.i_mode = mode | IALLOC;
 
-    int err = inode_write(u, (uint16_t)inr, &inode);
+    int err = inode_write(u, (uint16_t) inr, &inode);
     if (err < 0) {
         return err;
     }
 
     struct filev6 fv6;
     fv6.i_node = inode;
-    fv6.i_number = (uint16_t)inr;
+    fv6.i_number = (uint16_t) inr;
     fv6.offset = 0;
     fv6.u = u;
 
