@@ -23,10 +23,12 @@ gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -
 gcc bmblock.o error.o inode.o sector.o sha.o direntv6.o mount.o filev6.o test-core.o test-dirent.o -o test-dirent -lcrypto 
 test-dirent done.
 making (our) test-bitmap: 
-gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code  -lcrypto  test-bitmap.c   -o test-bitmap
+gcc -D_DEFAULT_SOURCE -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o test-bitmap.o -c test-bitmap.c
+gcc bmblock.o -lcrypto test-bitmap.o -o test-bitmap
 test-bitmap done.
 =====
-testing our test-inodes on disk simple.uv6: done.
+testing our test-inodes on disk simple.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 32					s_isize             : 32
@@ -47,7 +49,8 @@ inode   1 (DIR) len   16					inode   1 (DIR) len   16
 inode   2 (DIR) len   16					inode   2 (DIR) len   16
 inode   3 (FIL) len   18					inode   3 (FIL) len   18
 =====
-testing our test-inodes on disk aiw.uv6: done.
+testing our test-inodes on disk aiw.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 64					s_isize             : 64
@@ -86,7 +89,8 @@ inode  19 (FIL) len 1428					inode  19 (FIL) len 1428
 inode  20 (DIR) len   16					inode  20 (DIR) len   16
 inode  21 (FIL) len 169856					inode  21 (FIL) len 169856
 =====
-testing our test-file on disk simple.uv6: done.
+testing our test-file on disk simple.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 32					s_isize             : 32
@@ -125,7 +129,8 @@ SHA inode 1: no SHA for directories.				SHA inode 1: no SHA for directories.
 SHA inode 2: no SHA for directories.				SHA inode 2: no SHA for directories.
 SHA inode 3: 338fc4bb0d037f3747396a4c852d2a9d8b545d622c6c744c	SHA inode 3: 338fc4bb0d037f3747396a4c852d2a9d8b545d622c6c744c
 =====
-testing our test-file on disk aiw.uv6: done.
+testing our test-file on disk aiw.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 64					s_isize             : 64
@@ -205,7 +210,8 @@ SHA inode 19: 37302d665c56d16309f795f023ffb46d5b457a2aa906a4e	SHA inode 19: 3730
 SHA inode 20: no SHA for directories.				SHA inode 20: no SHA for directories.
 SHA inode 21: 7ee39739006a4a5f1b2a082d1f825837ee4403c85acc8a6	SHA inode 21: 7ee39739006a4a5f1b2a082d1f825837ee4403c85acc8a6
 =====
-testing our test-dirent on disk simple.uv6: done.
+testing our test-dirent on disk simple.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 32					s_isize             : 32
@@ -226,7 +232,8 @@ DIR /								DIR /
 DIR /tmp/							DIR /tmp/
 FIL /tmp/coucou.txt						FIL /tmp/coucou.txt
 =====
-testing our test-dirent on disk aiw.uv6: done.
+testing our test-dirent on disk aiw.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+done.
 diff from reference:
 **********FS SUPERBLOCK START**********				**********FS SUPERBLOCK START**********
 s_isize             : 64					s_isize             : 64
@@ -264,17 +271,104 @@ FIL /books/aiw/by_chapters/11-0-c12.txt				FIL /books/aiw/by_chapters/11-0-c12.t
 FIL /books/aiw/by_chapters/11-0-end.txt				FIL /books/aiw/by_chapters/11-0-end.txt
 DIR /books/aiw/full/						DIR /books/aiw/full/
 FIL /books/aiw/full/11-0.txt					FIL /books/aiw/full/11-0.txt
-executable "test-bitmap" wasn't built
+=====
+testing our test-bitmap on disk simple.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+done.
+diff from reference:
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 00000000 00000000 00000000 00000000 00000000 00000000 0000	0: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+1: 00000000 00000000 00000000 00000000 00000000 00000000 0000	1: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 4							find_next() = 4
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 11100000 00000000 00000000 00000000 00000000 00000000 0000	0: 11100000 00000000 00000000 00000000 00000000 00000000 0000
+1: 00000000 00000000 00000000 00000000 00000000 00000000 0000	1: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 7							find_next() = 7
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 11110010 01001001 00100100 10010010 01001001 00100100 1001	0: 11110010 01001001 00100100 10010010 01001001 00100100 1001
+1: 00100100 10010010 01001001 00100100 10010010 01001001 0010	1: 00100100 10010010 01001001 00100100 10010010 01001001 0010
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 8							find_next() = 8
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 10110000 01001001 00100000 10010010 01000001 00100100 1000	0: 10110000 01001001 00100000 10010010 01000001 00100100 1000
+1: 00000100 10010010 00001001 00100100 00010010 01001000 0010	1: 00000100 10010010 00001001 00100100 00010010 01001000 0010
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 5							find_next() = 5
+=====
+testing our test-bitmap on disk aiw.uv6: Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+done.
+diff from reference:
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 00000000 00000000 00000000 00000000 00000000 00000000 0000	0: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+1: 00000000 00000000 00000000 00000000 00000000 00000000 0000	1: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 4							find_next() = 4
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 11100000 00000000 00000000 00000000 00000000 00000000 0000	0: 11100000 00000000 00000000 00000000 00000000 00000000 0000
+1: 00000000 00000000 00000000 00000000 00000000 00000000 0000	1: 00000000 00000000 00000000 00000000 00000000 00000000 0000
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 7							find_next() = 7
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 11110010 01001001 00100100 10010010 01001001 00100100 1001	0: 11110010 01001001 00100100 10010010 01001001 00100100 1001
+1: 00100100 10010010 01001001 00100100 10010010 01001001 0010	1: 00100100 10010010 01001001 00100100 10010010 01001001 0010
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 8							find_next() = 8
+**********BitMap Block START**********				**********BitMap Block START**********
+length: 2							length: 2
+min: 4								min: 4
+max: 131							max: 131
+cursor: 0							cursor: 0
+content:							content:
+0: 10110000 01001001 00100000 10010010 01000001 00100100 1000	0: 10110000 01001001 00100000 10010010 01000001 00100100 1000
+1: 00000100 10010010 00001001 00100100 00010010 01001000 0010	1: 00000100 10010010 00001001 00100100 00010010 01001000 0010
+**********BitMap Block END************				**********BitMap Block END************
+find_next() = 5							find_next() = 5
 =====
 making (your) shell: 
-gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-bmblock.c -o test-bmblock.o 
-gcc bmblock.o error.o sha.o mount.o direntv6.o filev6.o sector.o inode.o test-core.o test-bmblock.o -o test-bmblock -lcrypto 
 gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-ibm-fbm.c -o test-ibm-fbm.o 
-gcc bmblock.o error.o sha.o mount.o direntv6.o filev6.o sector.o inode.o test-core.o test-ibm-fbm.o -o test-ibm-fbm -lcrypto 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o test-core.o test-ibm-fbm.o -o test-ibm-fbm -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-inodes-create.c -o test-inodes-create.o 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o test-core.o test-inodes-create.o -o test-inodes-create -lcrypto 
 gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code shell.c -o shell.o 
-gcc bmblock.o error.o sha.o mount.o direntv6.o filev6.o sector.o inode.o shell.o -o shell -lcrypto 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o shell.o -o shell -lcrypto 
 gcc -D_DEFAULT_SOURCE $(pkg-config fuse --cflags) -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o fs.o -c fs.c
-gcc bmblock.o error.o sha.o mount.o direntv6.o filev6.o sector.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
 shell done.
 testing your shell: 
 done.
@@ -672,24 +766,267 @@ looking for it, while the rest of the party went back to the 	looking for it, wh
 
 >>> >>> 						      |	>>> =====
 making (your) fs: 
-gcc sha.o inode.o mount.o error.o direntv6.o filev6.o bmblock.o sector.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
 fs done.
 
 -----
 stderr:
-test-bmblock.c:20:17: warning: ‘struct unix_filesystem’ declared inside parameter list
- int test(struct unix_filesystem *u) {
-                 ^
-test-bmblock.c:20:17: warning: its scope is only this definition or declaration, which is probably not what you want
-shell.c: In function ‘do_mkfs’:
-shell.c:302:26: warning: unused parameter ‘args’ [-Wunused-parameter]
- int do_mkfs(const char** args) {
-                          ^
-shell.c: In function ‘do_mkdir’:
-shell.c:311:27: warning: unused parameter ‘args’ [-Wunused-parameter]
- int do_mkdir(const char** args) {
-                           ^
++ '[' 1 -ge 1 ']'
++ week_num=9
+++ realpath /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ student_dir=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++++ realpath /home/whitlock/pps/Dev2017/grading/students_feedback/week09/submit.sh
+++ dirname /home/whitlock/pps/Dev2017/grading/students_feedback/week09/submit.sh
++ DIR=/home/whitlock/pps/Dev2017/grading/students_feedback/week09
+++ realpath /home/whitlock/pps/Dev2017/grading/students_feedback/week09/../../..
++ project_root=/home/whitlock/pps/Dev2017
++ tests='test-inodes test-file test-dirent test-bitmap'
++ disks='simple.uv6 aiw.uv6'
++ disks_dir=/home/whitlock/pps/Dev2017/mainprj/disks
++ expected_dir=/home/whitlock/pps/Dev2017/mainprj/expected/week09
++ cmdfile=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_cmd.txt
++ refoutput=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_expected_output.txt
++ '[' '!' -d /home/whitlock/pps/Dev2017/mainprj/expected/week09 ']'
++ pushd /home/whitlock/pps/Dev2017/mainprj/expected/week09
++ make
++ popd
++ '[' -d /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done ']'
++ for name in '$tests'
++ src=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-inodes.c
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-inodes.c
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-inodes.c ']'
++ '[' -x /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-inodes ']'
++ cp /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-inodes.c /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ for name in '$tests'
++ src=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-file.c
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-file.c
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-file.c ']'
++ '[' -x /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-file ']'
++ cp /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-file.c /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ for name in '$tests'
++ src=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-dirent.c
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-dirent.c
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-dirent.c ']'
++ '[' -x /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-dirent ']'
++ cp /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-dirent.c /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ for name in '$tests'
++ src=/home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-bitmap.c
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-bitmap.c
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-bitmap.c ']'
++ '[' -x /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-bitmap ']'
++ cp /home/whitlock/pps/Dev2017/grading/students_feedback/week09/test-bitmap.c /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ for disk in '$disks'
++ '[' -f /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6 ']'
++ for disk in '$disks'
++ '[' -f /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6 ']'
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_cmd.txt
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_cmd.txt ']'
++ required_ressource_file /home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_expected_output.txt
++ '[' -f /home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_expected_output.txt ']'
++ pushd /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ for name in '$tests'
++ rm -f test-inodes
++ echo 'making (our) test-inodes: '
++ make test-inodes
+direntv6.c: In function ‘direntv6_create’:
+direntv6.c:196:38: warning: passing argument 3 of ‘memset’ makes integer from pointer without a cast [-Wint-conversion]
+     memset(child, DIRENT_MAXLEN + 1, child);
+                                      ^
+In file included from direntv6.c:5:0:
+/usr/include/string.h:62:14: note: expected ‘size_t {aka long unsigned int}’ but argument is of type ‘char *’
+ extern void *memset (void *__s, int __c, size_t __n) __THROW __nonnull ((1));
+              ^
+direntv6.c:223:20: warning: passing argument 2 of ‘strncpy’ makes pointer from integer without a cast [-Wint-conversion]
+     strncpy(child, entry[i], DIRENT_MAXLEN);
+                    ^
+In file included from direntv6.c:5:0:
+/usr/include/string.h:128:14: note: expected ‘const char * restrict’ but argument is of type ‘char’
+ extern char *strncpy (char *__restrict __dest,
+              ^
+direntv6.c:238:19: warning: variable ‘fv6’ set but not used [-Wunused-but-set-variable]
+     struct filev6 fv6;
+                   ^
++ echo 'test-inodes done.'
++ for name in '$tests'
++ rm -f test-file
++ echo 'making (our) test-file: '
++ make test-file
++ echo 'test-file done.'
++ for name in '$tests'
++ rm -f test-dirent
++ echo 'making (our) test-dirent: '
++ make test-dirent
++ echo 'test-dirent done.'
++ for name in '$tests'
++ rm -f test-bitmap
++ echo 'making (our) test-bitmap: '
++ make test-bitmap
++ echo 'test-bitmap done.'
++ popd
++ for name in '$tests'
++ exec=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes
++ '[' '!' -x /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes ']'
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-inodes on disk simple.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ set -e
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-inodes on disk aiw.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-inodes /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ set -e
++ for name in '$tests'
++ exec=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file
++ '[' '!' -x /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file ']'
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-file on disk simple.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-file /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ set -e
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-file on disk aiw.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-file /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-file /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ set -e
++ for name in '$tests'
++ exec=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent
++ '[' '!' -x /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent ']'
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-dirent on disk simple.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ set -e
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-dirent on disk aiw.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-dirent /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ set -e
++ for name in '$tests'
++ exec=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap
++ '[' '!' -x /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap ']'
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-bitmap on disk simple.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
++ set -e
++ for disk in '$disks'
++ echo =====
++ printf 'testing our test-bitmap on disk aiw.uv6: '
++ echo 'Running command: /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6'
++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ fine=0
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /dev/fd/63 /dev/fd/62
+++ /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+++ /home/whitlock/pps/Dev2017/mainprj/expected/week09/test-bitmap /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
++ set -e
++ echo =====
++ try_to_make /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done shell
++ '[' -d /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done ']'
++ '[' xshell '!=' x ']'
++ pushd /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ rm -f shell
++ echo 'making (your) shell: '
++ make
 shell.c: In function ‘do_add’:
-shell.c:332:25: warning: unused parameter ‘args’ [-Wunused-parameter]
+shell.c:349:25: warning: unused parameter ‘args’ [-Wunused-parameter]
  int do_add(const char** args) {
                          ^
++ '[' -x shell ']'
++ echo 'shell done.'
++ popd
++ name=shell
++ exec=/home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/shell
++ '[' '!' -x /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/shell ']'
++ echo 'testing your shell: '
+++ mktemp
++ output=/tmp/tmp.2f5CZEEsTM
++ set +e
++ timeout -s TERM -k 15s 10s /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done/shell
++ fine=0
++ set -e
++ '[' x0 = x0 ']'
++ echo done.
++ echo 'diff from reference:'
++ set +e
++ diff -wy /tmp/tmp.2f5CZEEsTM /home/whitlock/pps/Dev2017/grading/students_feedback/week09/shell_expected_output.txt
++ true
++ set -e
++ echo =====
++ try_to_make /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done fs
++ '[' -d /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done ']'
++ '[' xfs '!=' x ']'
++ pushd /home/whitlock/pps/pps17_repos/team/repositories/pps17-team-no-id/repository/done
++ rm -f fs
++ echo 'making (your) fs: '
++ make
++ '[' -x fs ']'
++ echo 'fs done.'
++ popd
