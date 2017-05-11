@@ -204,15 +204,16 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         return ERR_BAD_PARAMETER;
     }
 
-    strncpy(parent, entry, last_slash - entry + 1);
+    strncpy(parent, entry, (size_t)(last_slash - entry + 1));
     if (direntv6_dirlookup(u, 1, parent) < 0) {
         return ERR_BAD_PARAMETER;
     }
 
-    if (strlen(child) > DIRENT_MAXLEN) {
+    size_t len = strlen(last_slash) - 1;
+    if (len > DIRENT_MAXLEN) {
         return ERR_FILENAME_TOO_LONG;
     }
-    strncpy(child, last_slash + 1, strlen(last_slash) - 1);
+    strncpy(child, last_slash + 1, len);
 
     debug_print("parent: %s\n", parent);
     debug_print("child: %s\n", child);

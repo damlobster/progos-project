@@ -14,8 +14,9 @@
 #include "error.h"
 #include "inode.h"
 #include "sha.h"
-
-//#define DEBUG
+#ifdef DEBUG
+#include "bmblock.h"
+#endif
 
 #define FS_MOUNTED if(u.f == NULL) { \
                         return SHELL_ERR_UNMOUNTED_FS; \
@@ -252,6 +253,13 @@ int do_psb(const char** args) {
     FS_MOUNTED;
 
     mountv6_print_superblock(&u);
+
+#ifdef DEBUG
+    puts("************** IBM **************");
+    bm_print(u.ibm);
+    puts("************** FBM **************");
+    bm_print(u.fbm);
+#endif
 
     return 0;
 }
