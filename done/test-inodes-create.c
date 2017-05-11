@@ -7,6 +7,12 @@
 
 #include "inode.h"
 
+/**
+ * Tests for the creation of new inodes
+ * @param u the file system
+ * @return <0 if error occured
+ */
+
 int test(struct unix_filesystem *u) {
 
     struct inode i;

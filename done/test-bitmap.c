@@ -45,6 +45,18 @@ int main() {
     bm_print(bm);
     printf("find_next() = %d\n", bm_find_next(bm));
 
+#ifdef DEBUG
+    int b = 0;
+    int last = 0;
+    while((b=bm_find_next(bm))>0){
+        bm_set(bm, (uint64_t)b);
+        last = b;
+    }
+
+    printf("bm_cursor=%lu, last bit=%d\n", bm->cursor, last);
+    bm_print(bm);
+#endif
+
     free(bm);
     return 0;
 }

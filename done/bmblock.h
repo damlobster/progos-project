@@ -17,14 +17,16 @@ extern "C" {
 #endif
 
 struct bmblock_array {
-    size_t length;
-    uint64_t cursor;
-    uint64_t min;
-    uint64_t max;
-    uint64_t bm[1];
+    size_t length; // size in words
+    uint64_t cursor; // index of the first not full word
+    uint64_t min; // index of the first bit (included)
+    uint64_t max;// index of the last bit (included)
+    uint64_t bm[1]; // array containing bits
 };
 
+// return the number of bytes per word
 #define BYTES_PER_VECTOR (sizeof(((struct bmblock_array*)0)->bm[0]))
+// return the number of bits per word
 #define BITS_PER_VECTOR (8*BYTES_PER_VECTOR)
 
 /**
@@ -70,13 +72,6 @@ int bm_find_next(struct bmblock_array *bmblock_array);
  * @param bmblock_array the array we want to see
  */
 void bm_print(struct bmblock_array *bmblock_array);
-
-///**
-// * Get the size in byte of the bitmap block
-// * @param bmblock_array
-// * @return 0 if bmblock_array is NULL, otherwise the number of bytes
-// */
-//size_t bm_sizeof(struct bmblock_array * bmblock_array);
 
 #ifdef __cplusplus
 }

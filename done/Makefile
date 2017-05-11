@@ -11,7 +11,7 @@ CFLAGS = -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow \
 LDFLAGS = -lcrypto
 
 debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds \
- -Wunused-but-set-variable -Wint-conversion -Wunused-parameter -DDEBUG
+-Wunused-but-set-variable -Wint-conversion -Wunused-parameter -DDEBUG
 #debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 
 ALL_SOURCES = $(wildcard *.c)
@@ -42,6 +42,7 @@ clean:
 clean-disks: 
 	cp -f ../provided/disks/* disks/
 
+## non standard builds
 fs.o: fs.c
 	$(CC) -D_DEFAULT_SOURCE $$(pkg-config fuse --cflags) $(CFLAGS) -o $@ -c $<
 

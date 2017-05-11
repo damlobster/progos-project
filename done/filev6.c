@@ -44,6 +44,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
     M_REQUIRE_NON_NULL(buf);
 
     if (fv6->offset >= inode_getsize(&fv6->i_node)) {
+        // already at the end of file --> read nothing !
         return 0;
     }
 
@@ -53,7 +54,13 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         return sector; // inode not allocated or error
     }
 
+    // read the sector
     int error = sector_read(fv6->u->f, (uint32_t) sector, buf);
+    if(error<0){
+        return error;
+    }
+
+    // caclulate the bytes read
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;
@@ -66,9 +73,9 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         read = SECTOR_SIZE;
     }
 
-    fv6->offset += SECTOR_SIZE; //FIXME increment only of size last_sector_size for the last block
+    fv6->offset += read;
 
-    return error < 0 ? error : read;
+    return read;
 }
 
 /**
@@ -100,10 +107,11 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
     M_REQUIRE_NON_NULL(fv6);
 
     if (u->s.s_inode_start > fv6->i_number) {
+        // the inode number is out of range
         return ERR_INODE_OUTOF_RANGE;
     }
 
-    fv6->i_node.i_mode = mode; //FIXME validate modes !?
+    fv6->i_node.i_mode = mode; //FIXME ajouter | IALLOC ? création d'un fichier seulement? validation?
     fv6->i_node.i_nlink = 0;
     fv6->i_node.i_uid = 0;
     fv6->i_node.i_gid = 0;
@@ -113,6 +121,7 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
     memset(fv6->i_node.i_atime, 0, 2 * sizeof(fv6->i_node.i_atime[0]));
     memset(fv6->i_node.i_mtime, 0, 2 * sizeof(fv6->i_node.i_mtime[0]));
 
+    // write the inode to disk
     int err = inode_write(u, fv6->i_number, &fv6->i_node);
     if(err!=0){
         return err;
@@ -133,4 +142,3 @@ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void 
     debug_print("filev6_writebytes(%d)", len);
     return 0;
 }
-

@@ -17,6 +17,12 @@
 #include "sha.h"
 #include "unixv6fs.h"
 
+/**
+ * Tests for filev6.c
+ * @param u the file system
+ * @return <0 if error occured
+ */
+
 int test(const struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(u);
 

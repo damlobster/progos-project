@@ -23,12 +23,14 @@ int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(d);
     M_REQUIRE_NON_NULL(u->f);
 
+    // read the inode
     struct inode inode;
     int error = inode_read(u, inr, &inode);
     if (error < 0) {
         return error;
     }
     if (!(inode.i_mode & IFDIR)) {
+        // the inode is not a directory
         return ERR_INVALID_DIRECTORY_INODE;
     }
 
@@ -52,15 +54,21 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(u->f);
     M_REQUIRE_NON_NULL(prefix);
 
+    // open the current directory
     struct directory_reader d;
     int error = direntv6_opendir(u, inr, &d);
-    if (error < 0) {
+    if (error == ERR_INVALID_DIRECTORY_INODE) {
+        // it's a file: print it!
         printf("FIL %s\n", prefix);
+        return 0;
+    }else if(error<0){
         return error;
     } else {
+        // it's a directory: print it
         printf("DIR %s/\n", prefix);
     }
 
+    //handle the children of the current directory
     int ret;
     char name[DIRENT_MAXLEN + 1];
     memset(name, 0, DIRENT_MAXLEN + 1);
@@ -72,12 +80,14 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
             return error;
         }
 
+        // build the new path prefix
         char new_prefix[MAXPATHLEN_UV6];
         memset(new_prefix, 0, MAXPATHLEN_UV6);
         strncat(new_prefix, prefix, MAXPATHLEN_UV6 - 1);
         strncat(new_prefix, "/", MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
         strncat(new_prefix, name, MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
 
+        // recurse on this child
         direntv6_print_tree(u, inode_nr, new_prefix);
     }
 
@@ -99,15 +109,21 @@ int direntv6_readdir(struct directory_reader *d, char *name,
 
     if (d->cur == d->last) {
         int read = filev6_readblock(&d->fv6, d->dirs);
-        if (read <= 0) return read; // an error occured
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+        if (read <= 0) {
+            return read; // an error occured
+        }
+#pragma GCC diagnostic ignored "-Wsign-conversion" // read > 0
+#pragma GCC diagnostic ignored "-Wconversion" // read is max SECTOR_SIZE
         d->last += read / sizeof (struct direntv6);
 #pragma GCC diagnostic pop
     }
+
+    // get the right DDE
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
     strncpy(name, curdir->d_name, DIRENT_MAXLEN);
+    // and set the child inode number
     *child_inr = curdir->d_inumber;
+    // increment the cursor for next call
     d->cur++;
 
     return 1;
@@ -185,12 +201,23 @@ int direntv6_dirlookup(const struct unix_filesystem *u, uint16_t inr,
 
 }
 
+/**
+ * @brief create a new direntv6 with the given name and given mode
+ * @param u a mounted filesystem
+ * @param entry the path of the new entry
+ * @param mode the mode of the new inode
+ * @return inr on success; <0 on error
+ */
 int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode) {
+    M_REQUIRE_NON_NULL(u);
+    M_REQUIRE_NON_NULL(entry);
+
     if (direntv6_dirlookup(u, 1, entry) > 0) {
         return ERR_FILENAME_ALREADY_EXISTS;
     }
 
     if (strlen(entry) > MAXPATHLEN_UV6 || entry[0] != '/') {
+        // path must start with a slash !
         return ERR_BAD_PARAMETER;
     }
 
@@ -200,17 +227,20 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     memset(child, 0, DIRENT_MAXLEN + 1);
 
     char* last_slash = strrchr(entry, '/');
-    if (last_slash == NULL || strlen(last_slash) == 1) {
+    if (strlen(last_slash) == 1) {
+        // entry could not end with a slash !
         return ERR_BAD_PARAMETER;
     }
 
     strncpy(parent, entry, (size_t)(last_slash - entry + 1));
     if (direntv6_dirlookup(u, 1, parent) < 0) {
+        // the parent directory doesn't exists !
         return ERR_BAD_PARAMETER;
     }
 
     size_t len = strlen(last_slash) - 1;
     if (len > DIRENT_MAXLEN) {
+        // the directory name > DIRENT_MAXLEN !
         return ERR_FILENAME_TOO_LONG;
     }
     strncpy(child, last_slash + 1, len);
@@ -218,6 +248,7 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     debug_print("parent: %s\n", parent);
     debug_print("child: %s\n", child);
 
+    //allocate inode
     int inr = inode_alloc(u);
     if (inr < 0) {
         return inr;
@@ -226,6 +257,7 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     struct inode inode = {0};
     inode.i_mode = mode | IALLOC;
 
+    // write it to the disk
     int err = inode_write(u, (uint16_t) inr, &inode);
     if (err < 0) {
         return err;

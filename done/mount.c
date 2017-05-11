@@ -38,7 +38,7 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
 
     memset(u, 0, sizeof (*u));
 
-    u->f = fopen(filename, "rb+"); //FIXME rw?
+    u->f = fopen(filename, "rb+");
     if (u->f == NULL) {
         return ERR_IO;
     }
@@ -53,11 +53,13 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
         return ERR_BADBOOTSECTOR;
     }
 
+    // read the superblock
     error = sector_read(u->f, SUPERBLOCK_SECTOR, &u->s);
     if (error != 0) {
         return error;
     }
 
+    // initialize the bitmaps for sectors and inodes
     u->ibm = bm_alloc(2, (uint64_t) u->s.s_isize * INODES_PER_SECTOR);
     u->fbm = bm_alloc((uint64_t) u->s.s_block_start + 1,
             (uint64_t) u->s.s_fsize);
@@ -112,6 +114,10 @@ int umountv6(struct unix_filesystem * u) {
     return 0;
 }
 
+/**
+ * Fill the inodes bitmap
+ * @param u the opened file system, not NULL
+ */
 void fill_ibm(struct unix_filesystem *u) {
     if (u == NULL) {
         return;
@@ -132,6 +138,10 @@ void fill_ibm(struct unix_filesystem *u) {
     }
 }
 
+/**
+ * Fill the sectors bitmap
+ * @param u the opened file system, not NULL
+ */
 void fill_fbm(struct unix_filesystem *u) {
     if (u == NULL) {
         return;
@@ -161,6 +171,11 @@ void fill_fbm(struct unix_filesystem *u) {
     }
 }
 
+/**
+ * @brief create a new filesystem
+ * @param num_blocks the total number of blocks (= max size of disk), in sectors
+ * @param num_inodes the total number of inodes
+ */
 int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes) {
     struct superblock sb = {0};
 

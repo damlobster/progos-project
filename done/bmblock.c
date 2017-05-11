@@ -13,6 +13,9 @@
 
 #include "error.h"
 
+#define BMB_ONE UINT64_C(1)
+#define BMB_ALL_ONES UINT64_MAX
+
 // Return the index of to the right "word" from bm[], n is the bit number
 #define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / BITS_PER_VECTOR)
 // Return a pointer to the right "word" from bm[], n is the bit number
@@ -30,10 +33,14 @@
 struct bmblock_array *bm_alloc(uint64_t min, uint64_t max) {
     if (min > max) return NULL;
     uint64_t nb_bits = max - min + 1;
-    uint64_t bm_length = (nb_bits / BITS_PER_VECTOR) + (nb_bits % BITS_PER_VECTOR > 0);
-    size_t size = sizeof(struct bmblock_array) + (bm_length-1) * BYTES_PER_VECTOR;
+    // size used in words (64bits) to store the bits
+    uint64_t bm_length = (nb_bits / BITS_PER_VECTOR)
+            + (nb_bits % BITS_PER_VECTOR > 0);
+    // size in bytes to allocate the struct
+    size_t size = sizeof(struct bmblock_array)
+            + (bm_length - 1) * BYTES_PER_VECTOR;
     struct bmblock_array* bmb = calloc(1, size);
-    if(bmb==NULL){
+    if (bmb == NULL) {
         return NULL;
     }
     bmb->cursor = 0;
@@ -54,8 +61,9 @@ int bm_get(struct bmblock_array *bmblock_array, uint64_t x) {
     if (x < bmblock_array->min || x > bmblock_array->max) {
         return ERR_BAD_PARAMETER;
     }
+    // get the bit value and return it
     return (BMB_GET_WORD(bmblock_array, x) >> BMB_GET_BIT_IDX(bmblock_array, x))
-            & 1;
+            & BMB_ONE;
 }
 
 /**
@@ -66,14 +74,10 @@ int bm_get(struct bmblock_array *bmblock_array, uint64_t x) {
 void bm_set(struct bmblock_array *bmblock_array, uint64_t x) {
     if (bmblock_array == NULL) return;
     if (x < bmblock_array->min || x > bmblock_array->max) return;
-    BMB_GET_WORD(bmblock_array, x) |= UINT64_C(
-            1) << BMB_GET_BIT_IDX(bmblock_array, x);
 
-    //useless
-    //if (bmblock_array->cursor == BMB_GET_WORD_IDX(bmblock_array, x)
-    //        && BMB_GET_WORD(bmblock_array, x) == UINT64_MAX) {
-    //    bmblock_array->cursor++;
-    //}
+    // set the bit
+    BMB_GET_WORD(bmblock_array, x) |= BMB_ONE
+            << BMB_GET_BIT_IDX(bmblock_array, x);
 }
 
 /**
@@ -84,10 +88,13 @@ void bm_set(struct bmblock_array *bmblock_array, uint64_t x) {
 void bm_clear(struct bmblock_array *bmblock_array, uint64_t x) {
     if (bmblock_array == NULL) return;
     if (x < bmblock_array->min || x > bmblock_array->max) return;
-    BMB_GET_WORD(bmblock_array, x) &= (UINT64_C(1)
-            << BMB_GET_BIT_IDX(bmblock_array, x)) ^ UINT64_MAX;
+
+    // clear the bit (using the XOR with all ones to implement a roll)
+    BMB_GET_WORD(bmblock_array, x) &= (BMB_ONE
+            << BMB_GET_BIT_IDX(bmblock_array, x)) ^ BMB_ALL_ONES;
 
     if (bmblock_array->cursor > BMB_GET_WORD_IDX(bmblock_array, x)) {
+        // update the cursor if it was after the current word64
         bmblock_array->cursor = BMB_GET_WORD_IDX(bmblock_array, x);
     }
 }
@@ -100,7 +107,7 @@ void bm_clear(struct bmblock_array *bmblock_array, uint64_t x) {
 int bm_find_next(struct bmblock_array *bmblock_array) {
     M_REQUIRE_NON_NULL(bmblock_array);
 
-    while (bmblock_array->bm[bmblock_array->cursor] == UINT64_MAX
+    while (bmblock_array->bm[bmblock_array->cursor] == BMB_ALL_ONES
             && bmblock_array->cursor < bmblock_array->length) {
         //update cursor if current BITS_PER_VECTOR bits are used
         bmblock_array->cursor++;
@@ -113,14 +120,18 @@ int bm_find_next(struct bmblock_array *bmblock_array) {
     unsigned char n;
     uint64_t last_bit = BITS_PER_VECTOR - 1;
     if (bmblock_array->cursor == bmblock_array->length - 1) {
+        // the last word64 is maybe not fully used, handle this
         last_bit = (bmblock_array->max - bmblock_array->min) % BITS_PER_VECTOR;
     }
-    for (n = 0; n < last_bit && //
-            (bmblock_array->bm[bmblock_array->cursor] & (UINT64_C(1) << n));
-            n++) {
-    }
+
+    // search the first cleared bit in the current vector
+    for (n = 0; n < last_bit &&
+            (bmblock_array->bm[bmblock_array->cursor] & (BMB_ONE << n)); n++);
+
+    // calc the real bit index
     uint64_t next_free = bmblock_array->min
             + BITS_PER_VECTOR * bmblock_array->cursor + n;
+
     return next_free <= bmblock_array->max ? (int) next_free : ERR_BITMAP_FULL;
 }
 
@@ -153,8 +164,9 @@ void bm_print(struct bmblock_array *bmblock_array) {
 #endif
         uint64_t word = bmblock_array->bm[i];
 
+        // print the bits in the word64
         for (int bit = 63; bit >= 0; bit--) {
-            putchar((word & 1) ? '1' : '0');
+            putchar((word & BMB_ONE) ? '1' : '0');
             word = word >> 1;
             if (bit % 8 == 0) putchar(' ');
         }
@@ -163,18 +175,3 @@ void bm_print(struct bmblock_array *bmblock_array) {
     printf("\n**********BitMap Block END************\n");
     fflush(stdout);
 }
-
-/**
- * Get the size in byte of the bitmap block
- * @param bmblock_array
- * @return <0 if bmblock_array is NULL, otherwise the number of bytes
- */
-size_t bm_sizeof(struct bmblock_array * bmblock_array) {
-    if (bmblock_array == NULL) {
-        return 0;
-    }
-
-    return sizeof(struct bmblock_array)
-            + (bmblock_array->length - 1) * (BITS_PER_VECTOR / 8);
-}
-

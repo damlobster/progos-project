@@ -23,8 +23,67 @@
 #include "direntv6.h"
 #include "error.h"
 
+// the filesystem struct
 struct unix_filesystem fs;
 
+/**
+ * get the attributes
+ * @param path
+ * @param stbuf
+ * @return
+ */
+static int fs_getattr(const char *path, struct stat *stbuf);
+
+/**
+ * Read a directory
+ * @param path
+ * @param buf
+ * @param filler
+ * @param offset
+ * @param fi
+ * @return
+ */
+static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+        off_t offset, struct fuse_file_info *fi);
+
+/**
+ * Read the content of a file
+ * @param path IN the path
+ * @param buf OUT the buffer where to put the data
+ * @param size the nb of bytes to read
+ * @param offset from where to read
+ * @param fi
+ * @return the nb of byte read
+ */
+static int fs_read(const char *path, char *buf, size_t size, off_t offset,
+        struct fuse_file_info *fi);
+
+/**
+ * From https://github.com/libfuse/libfuse/wiki/Option-Parsing.
+ * This will look up into the args to search for the name of the FS.
+ */
+static int arg_parse(void *data, const char *filename, int key,
+        struct fuse_args *outargs);
+
+static struct fuse_operations available_ops = { .getattr = fs_getattr,
+        .readdir = fs_readdir, .read = fs_read };
+
+int main(int argc, char *argv[]) {
+    struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
+    int ret = fuse_opt_parse(&args, NULL, NULL, arg_parse);
+    if (ret == 0) {
+        ret = fuse_main(args.argc, args.argv, &available_ops, NULL);
+        (void) umountv6(&fs);
+    }
+    return ret;
+}
+
+/**
+ * get the attributes
+ * @param path
+ * @param stbuf
+ * @return
+ */
 static int fs_getattr(const char *path, struct stat *stbuf) {
     int res = 0;
 
@@ -74,6 +133,15 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
     return res;
 }
 
+/**
+ * Read a directory
+ * @param path
+ * @param buf
+ * @param filler
+ * @param offset
+ * @param fi
+ * @return
+ */
 static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         off_t offset, struct fuse_file_info *fi) {
     (void) offset;
@@ -107,6 +175,15 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
+/**
+ * Read the content of a file
+ * @param path IN the path
+ * @param buf OUT the buffer where to put the data
+ * @param size the nb of bytes to read
+ * @param offset from where to read
+ * @param fi
+ * @return the nb of byte read
+ */
 static int fs_read(const char *path, char *buf, size_t size, off_t offset,
         struct fuse_file_info *fi) {
     (void) fi;
@@ -157,17 +234,4 @@ static int arg_parse(void *data, const char *filename, int key,
         return 0;
     }
     return 1;
-}
-
-static struct fuse_operations available_ops = { .getattr = fs_getattr,
-        .readdir = fs_readdir, .read = fs_read };
-
-int main(int argc, char *argv[]) {
-    struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-    int ret = fuse_opt_parse(&args, NULL, NULL, arg_parse);
-    if (ret == 0) {
-        ret = fuse_main(args.argc, args.argv, &available_ops, NULL);
-        (void) umountv6(&fs);
-    }
-    return ret;
 }

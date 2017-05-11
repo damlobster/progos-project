@@ -11,6 +11,9 @@
 #include "error.h"
 #include "sector.h"
 
+#define M_INODE_GET_SECTOR_ADDR(u, inr) (u->s.s_inode_start + (uint32_t)(inr / INODES_PER_SECTOR))
+#define M_INODE_GET_INDEX_IN_SECTOR(inr) (inr % INODES_PER_SECTOR)
+
 /**
  * Read all inodes that are part of the same sector containing inode nb 'inr'
  * @param u IN the filesystem

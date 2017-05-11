@@ -12,8 +12,8 @@
 
 /**
  * Tests for IBM and FBM allocation and filling
- * @param u UNUSED
- * @return 0;
+ * @param u the filesystem
+ * @return 0
  */
 int test(struct unix_filesystem *u) {
     puts("### fbm:");
