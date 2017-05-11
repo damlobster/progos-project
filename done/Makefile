@@ -10,7 +10,8 @@ CFLAGS = -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow \
 -Wunreachable-code
 LDFLAGS = -lcrypto
 
-debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds 
+debug: CFLAGS += -g -Wconversion -Wformat -Werror=format-security -Werror=array-bounds \
+ -Wunused-but-set-variable -Wint-conversion -Wunused-parameter -DDEBUG
 #debug: LDFLAGS += -fsanitize=null,leak,bounds,address,undefined
 
 ALL_SOURCES = $(wildcard *.c)
