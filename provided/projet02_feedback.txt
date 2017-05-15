@@ -1,0 +1,56 @@
+Submission accepted
+
+stdout:
+=====
+Attempting to make target shell
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code bmblock.c -o bmblock.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code error.c -o error.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code inode.c -o inode.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sector.c -o sector.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sha.c -o sha.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code direntv6.c -o direntv6.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code mount.c -o mount.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code filev6.c -o filev6.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-core.c -o test-core.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-inodes.c -o test-inodes.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o test-core.o test-inodes.o -o test-inodes -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-file.c -o test-file.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o test-core.o test-file.o -o test-file -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-dirent.c -o test-dirent.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o test-core.o test-dirent.o -o test-dirent -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-ibm-fbm.c -o test-ibm-fbm.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o test-core.o test-ibm-fbm.o -o test-ibm-fbm -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-inodes-create.c -o test-inodes-create.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o test-core.o test-inodes-create.o -o test-inodes-create -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code shell.c -o shell.o 
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o shell.o -o shell -lcrypto 
+gcc -D_DEFAULT_SOURCE $(pkg-config fuse --cflags) -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o fs.o -c fs.c
+gcc bmblock.o sector.o sha.o mount.o error.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+gcc -D_DEFAULT_SOURCE -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o test-bitmap.o -c test-bitmap.c
+gcc bmblock.o -lcrypto test-bitmap.o -o test-bitmap
+Made target shell successfully
+=====
+Attempting to make target fs
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+Made target fs successfully
+Submission accepted
+
+-----
+stderr:
+filev6.c: In function ‘filev6_writebytes’:
+filev6.c:141:47: warning: unused parameter ‘u’ [-Wunused-parameter]
+ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
+                                               ^
+filev6.c:141:65: warning: unused parameter ‘fv6’ [-Wunused-parameter]
+ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
+                                                                 ^
+filev6.c:141:82: warning: unused parameter ‘buf’ [-Wunused-parameter]
+ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
+                                                                                  ^
+filev6.c:141:91: warning: unused parameter ‘len’ [-Wunused-parameter]
+ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
+                                                                                           ^
+shell.c: In function ‘do_add’:
+shell.c:357:25: warning: unused parameter ‘args’ [-Wunused-parameter]
+ int do_add(const char** args) {
+                         ^
