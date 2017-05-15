@@ -56,7 +56,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
 
     // read the sector
     int error = sector_read(fv6->u->f, (uint32_t) sector, buf);
-    if(error<0){
+    if (error < 0) {
         return error;
     }
 
@@ -117,18 +117,30 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
     fv6->i_node.i_gid = 0;
     fv6->i_node.i_size0 = 0;
     fv6->i_node.i_size1 = 0;
-    memset(fv6->i_node.i_addr, 0, ADDR_SMALL_LENGTH * sizeof(fv6->i_node.i_addr[0]));
+    memset(fv6->i_node.i_addr, 0,
+    ADDR_SMALL_LENGTH * sizeof(fv6->i_node.i_addr[0]));
     memset(fv6->i_node.i_atime, 0, 2 * sizeof(fv6->i_node.i_atime[0]));
     memset(fv6->i_node.i_mtime, 0, 2 * sizeof(fv6->i_node.i_mtime[0]));
 
     // write the inode to disk
     int err = inode_write(u, fv6->i_number, &fv6->i_node);
-    if(err!=0){
+    if (err != 0) {
         return err;
     }
 
     return 0;
 }
+
+/**
+ * @brief write a sector new sector or fill an existing one
+ * @param u the filesystem
+ * @param fv6 the file
+ * @param buf the data to write
+ * @param len the number of bytes in buf
+ * @return <0 in case of error, otherwise the number of bytes written
+ */
+int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
+        const void *buf, uint32_t len);
 
 /**
  * @brief write the len bytes of the given buffer on disk to the given filev6
@@ -138,7 +150,82 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
  * @param len the length of the bytes we want to write
  * @return 0 on success; <0 on errror
  */
-int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
-    debug_print("filev6_writebytes(%d)", len);
-    return 0;
+int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6,
+        const void *buf, int len) {
+    M_REQUIRE_FS_MOUNTED(u);
+    M_REQUIRE_NON_NULL(fv6);
+    M_REQUIRE_NON_NULL(buf);
+
+    int32_t file_size = inode_getsize(&fv6->i_node);
+    if (file_size + len > EXTRA_LARGE_FILE_SIZE) {
+        return ERR_FILE_TOO_LARGE;
+    }
+    fv6->offset = file_size;
+
+    int remain = len;
+    const char* b = buf;
+    while (remain > 0) {
+        int written_bytes = filev6_writesector(u, fv6, b, (uint32_t) remain);
+        if (written_bytes < 0) {
+            return written_bytes;
+        }
+        b += written_bytes;
+        remain -= written_bytes;
+    }
+
+    inode_setsize(&fv6->i_node, fv6->offset);
+
+    int err = inode_write(u, fv6->i_number, &fv6->i_node);
+    if (err < 0) {
+        return err;
+    }
+    return len;
+}
+
+int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
+        const void *buf, uint32_t len) {
+    // internal method: no check of arguments validity
+
+    uint32_t write_from = (uint32_t) fv6->offset % SECTOR_SIZE;
+    uint32_t bytes_to_write = SECTOR_SIZE - write_from;
+    if (len < bytes_to_write) {
+        bytes_to_write = len;
+    }
+
+    unsigned char sec_buf[SECTOR_SIZE];
+    int sec_nb = 0;
+    if (write_from > 0) {
+        // the last sector is not full, fill it
+        sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset);
+        if (sec_nb < 0) {
+            return sec_nb;
+        }
+        int read = sector_read(u->f, (uint32_t) sec_nb, sec_buf);
+        if (read < 0) {
+            return read;
+        }
+    } else {
+        // allocate a new sector
+        sec_nb = bm_find_next(u->ibm);
+        if (sec_nb < 0) {
+            return ERR_NOMEM;
+        }
+
+        // FIXME handle here the large files: go to indirect addressing
+        fv6->i_node.i_addr[inode_getsectorsize(&fv6->i_node) + 1] =
+                (uint16_t) sec_nb;
+    }
+
+    memcpy(&sec_buf[write_from], buf, bytes_to_write);
+
+    int err = sector_write(u->f, (uint32_t) sec_nb, sec_buf);
+    if (err < 0) {
+        return err;
+    }
+
+    fv6->offset += (int32_t) bytes_to_write;
+
+    // set (maybe again) that this sector is used
+    bm_set(u->ibm, (uint64_t) sec_nb);
+    return (int) bytes_to_write;
 }

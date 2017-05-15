@@ -158,6 +158,9 @@ extern "C" {
 #define ADDRESS_SIZE 2 /* bytes */
 #define ADDRESSES_PER_SECTOR (SECTOR_SIZE / ADDRESS_SIZE)
 
+#define SMALL_FILE_SIZE 8 * SECTOR_SIZE
+#define EXTRA_LARGE_FILE_SIZE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
+
 /*
  * Definition of the boot block
  *   On a real bootable device, this contains bootstrap code.

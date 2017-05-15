@@ -154,7 +154,7 @@ void fill_fbm(struct unix_filesystem *u) {
             continue;
         }
         int32_t isize = inode_getsize(&inode);
-        if (isize > INODE_SMALL_FILE && isize <= INODE_EXTRA_LARGE_FILE) {
+        if (isize > SMALL_FILE_SIZE && isize <= EXTRA_LARGE_FILE_SIZE) {
             for (int j = 0; j <= isize / (SECTOR_SIZE * ADDRESSES_PER_SECTOR);
                     j++) {
                 debug_print("INDIRECT SECTOR %d USED\n", inode.i_addr[j]);

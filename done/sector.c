@@ -10,6 +10,7 @@
 
 #include "error.h"
 #include "unixv6fs.h"
+#include "mount.h"
 
 /**
  * @brief read one 512-byte sector from the virtual disk
@@ -21,6 +22,8 @@
 int sector_read(FILE *f, uint32_t sector, void *data) {
     M_REQUIRE_NON_NULL(f);
     M_REQUIRE_NON_NULL(data);
+
+    debug_print("SECTOR_READ: sec_nb=%d, byte=%d\n", sector, sector*SECTOR_SIZE);
 
     if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
         return ERR_IO;

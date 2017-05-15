@@ -61,7 +61,7 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
         // it's a file: print it!
         printf("FIL %s\n", prefix);
         return 0;
-    }else if(error<0){
+    } else if (error < 0) {
         return error;
     } else {
         // it's a directory: print it
@@ -114,7 +114,7 @@ int direntv6_readdir(struct directory_reader *d, char *name,
         }
 #pragma GCC diagnostic ignored "-Wsign-conversion" // read > 0
 #pragma GCC diagnostic ignored "-Wconversion" // read is max SECTOR_SIZE
-        d->last += read / sizeof (struct direntv6);
+        d->last += read / sizeof(struct direntv6);
 #pragma GCC diagnostic pop
     }
 
@@ -221,10 +221,10 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         return ERR_BAD_PARAMETER;
     }
 
-    char parent[MAXPATHLEN_UV6 + 1];
-    memset(parent, 0, MAXPATHLEN_UV6 + 1);
-    char child[DIRENT_MAXLEN + 1];
-    memset(child, 0, DIRENT_MAXLEN + 1);
+    char path[MAXPATHLEN_UV6 + 1];
+    memset(path, 0, MAXPATHLEN_UV6 + 1);
+    char filename[DIRENT_MAXLEN + 1];
+    memset(filename, 0, DIRENT_MAXLEN + 1);
 
     char* last_slash = strrchr(entry, '/');
     if (strlen(last_slash) == 1) {
@@ -232,8 +232,9 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         return ERR_BAD_PARAMETER;
     }
 
-    strncpy(parent, entry, (size_t)(last_slash - entry + 1));
-    if (direntv6_dirlookup(u, 1, parent) < 0) {
+    strncpy(path, entry, (size_t) (last_slash - entry + 1));
+    int parent_dir_inr = direntv6_dirlookup(u, 1, path);
+    if (parent_dir_inr < 0) {
         // the parent directory doesn't exists !
         return ERR_BAD_PARAMETER;
     }
@@ -243,37 +244,47 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         // the directory name > DIRENT_MAXLEN !
         return ERR_FILENAME_TOO_LONG;
     }
-    strncpy(child, last_slash + 1, len);
+    strncpy(filename, last_slash + 1, len);
 
-    debug_print("parent: %s\n", parent);
-    debug_print("child: %s\n", child);
+    debug_print("path: %s\n", path);
+    debug_print("filename: %s\n", filename);
 
-    //allocate inode
-    int inr = inode_alloc(u);
-    if (inr < 0) {
-        return inr;
+    //allocate file_inode
+    int new_inr = inode_alloc(u);
+    if (new_inr < 0) {
+        return new_inr;
     }
 
-    struct inode inode = {0};
+    struct inode inode = { 0 };
     inode.i_mode = mode | IALLOC;
 
     // write it to the disk
-    int err = inode_write(u, (uint16_t) inr, &inode);
+    int err = inode_write(u, (uint16_t) new_inr, &inode);
     if (err < 0) {
         return err;
     }
+
+    err = inode_read(u, (uint16_t)parent_dir_inr, &inode);
+    if(err<0){
+        return err;
+    }
+    debug_print("DIRENTV6_CREATE: path file_inode size=%d\n", inode_getsize(&inode));
+
+    struct direntv6 dirent;
+    dirent.d_inumber = (uint16_t) new_inr;
+    strncpy(dirent.d_name, filename, DIRENT_MAXLEN);
 
     struct filev6 fv6;
     fv6.i_node = inode;
-    fv6.i_number = (uint16_t) inr;
+    fv6.i_number = (uint16_t) parent_dir_inr;
     fv6.offset = 0;
     fv6.u = u;
 
-    err = filev6_writebytes(u, &fv6, NULL, 0);
+    err = filev6_writebytes(u, &fv6, &dirent, sizeof(dirent));
     if (err < 0) {
         return err;
     }
 
-    return 0;
+    return new_inr;
 }
 

@@ -15,9 +15,6 @@
 extern "C" {
 #endif
 
-#define INODE_SMALL_FILE 8 * SECTOR_SIZE
-#define INODE_EXTRA_LARGE_FILE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
-
 /**
  * @brief Return the size of a file associated to a given inode.
  *
@@ -29,8 +26,7 @@ extern "C" {
  * @param inode the inode
  * @return the size of the file
  */
-static inline int32_t inode_getsize(const struct inode *inode)
-{
+static inline int32_t inode_getsize(const struct inode *inode) {
     return ((inode->i_size0 << 16) | inode->i_size1);
 }
 
@@ -48,8 +44,7 @@ static inline int32_t inode_getsize(const struct inode *inode)
  * @param inode the inode
  * @return the size to store sector-read data plus one extra null char.
  */
-static inline int32_t inode_getsectorsize(const struct inode *inode)
-{
+static inline int32_t inode_getsectorsize(const struct inode *inode) {
     const int32_t i_size = inode_getsize(inode);
     return (i_size ? ((i_size - 1) / SECTOR_SIZE + 1) * SECTOR_SIZE + 1 : 1);
 }
@@ -83,7 +78,8 @@ int inode_scan_print(const struct unix_filesystem *u);
  * @param inode the inode structure, read from disk (OUT)
  * @return 0 on success; <0 on error
  */
-int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inode);
+int inode_read(const struct unix_filesystem *u, uint16_t inr,
+        struct inode *inode);
 
 /**
  * @brief identify the sector that corresponds to a given portion of a file
@@ -92,7 +88,8 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr, struct inode *inod
  * @param file_sec_off the offset within the file (in sector-size units)
  * @return >0: the sector on disk;  <0 error
  */
-int inode_findsector(const struct unix_filesystem *u, const struct inode *i, int32_t file_sec_off);
+int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
+        int32_t file_sec_off);
 
 /**
  * @brief alloc a new inode (returns its inr if possible)
@@ -108,7 +105,8 @@ int inode_alloc(struct unix_filesystem *u);
  * @param inode the inode structure, read from disk (IN)
  * @return 0 on success; <0 on error
  */
-int inode_write(struct unix_filesystem *u, uint16_t inr, const struct inode *inode);
+int inode_write(struct unix_filesystem *u, uint16_t inr,
+        const struct inode *inode);
 
 #ifdef __cplusplus
 }

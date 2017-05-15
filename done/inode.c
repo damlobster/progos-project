@@ -47,8 +47,8 @@ int inode_scan_print(const struct unix_filesystem *u) {
                 // inode is allocated --> print it
                 int size = inode_getsize(&inodes[i]);
                 const char *type = (inodes[i].i_mode & IFDIR) ?
-                        SHORT_DIR_NAME :
-                        SHORT_FIL_NAME;
+                SHORT_DIR_NAME :
+                                                                SHORT_FIL_NAME;
                 printf("inode %3zu (%s) len %4d\n",
                         i + (k - 2) * INODES_PER_SECTOR, type, size);
             }
@@ -128,11 +128,11 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
         return ERR_OFFSET_OUT_OF_RANGE;
     }
 
-    if (isize <= INODE_SMALL_FILE) {
+    if (isize <= SMALL_FILE_SIZE) {
         //direct addressing
         debug_print("has sector %d\n", i->i_addr[file_sec_off]);
         return i->i_addr[file_sec_off];
-    } else if (isize <= INODE_EXTRA_LARGE_FILE) {
+    } else if (isize <= EXTRA_LARGE_FILE_SIZE) {
         // indirect addressing
         int16_t addrs[ADDRESSES_PER_SECTOR];
         int err = sector_read(u->f,
@@ -157,7 +157,8 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
  * @param inode the inode structure, read from disk (IN)
  * @return 0 on success; <0 on error
  */
-int inode_write(struct unix_filesystem *u, uint16_t inr, const struct inode *inode) {
+int inode_write(struct unix_filesystem *u, uint16_t inr,
+        const struct inode *inode) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
 
@@ -193,12 +194,40 @@ int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
     return error; // propagate sector_read error
 }
 
+/**
+ * @brief alloc a new inode (returns its inr if possible)
+ * @param u the filesystem (IN)
+ * @return the inode number of the new inode or error code on error
+ */
 int inode_alloc(struct unix_filesystem* u) {
+    M_REQUIRE_NON_NULL(u);
     int inr = bm_find_next(u->ibm);
     if (inr < 0) {
         return ERR_NOMEM;
     }
-    bm_set(u->ibm, (uint64_t)inr);
+    bm_set(u->ibm, (uint64_t) inr);
 
     return inr;
+}
+
+/**
+ * @brief set the size of a given inode to the given size
+ * @param inode the inode
+ * @param new_size the new size
+ * @return 0 on success; <0 on error
+ */
+int inode_setsize(struct inode *inode, int new_size) {
+    M_REQUIRE_NON_NULL(inode);
+
+    if (new_size < 0) {
+        return ERR_NOMEM;
+    }
+    if (new_size > EXTRA_LARGE_FILE_SIZE) {
+        return ERR_FILE_TOO_LARGE;
+    }
+
+    inode->i_size1 = (uint16_t)(new_size & UINT16_MAX);
+    inode->i_size0 = (uint8_t)((new_size >> 16) & UINT8_MAX);
+
+    return 0;
 }
