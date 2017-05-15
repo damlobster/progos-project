@@ -16,6 +16,9 @@
 #define BMB_ONE UINT64_C(1)
 #define BMB_ALL_ONES UINT64_MAX
 
+// return the number of bytes per word
+#define BYTES_PER_VECTOR (sizeof(((struct bmblock_array*)0)->bm[0]))
+
 // Return the index of to the right "word" from bm[], n is the bit number
 #define BMB_GET_WORD_IDX(bmb, n) ((n - bmb->min) / BITS_PER_VECTOR)
 // Return a pointer to the right "word" from bm[], n is the bit number

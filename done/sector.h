@@ -34,7 +34,7 @@ int sector_read(FILE *f, uint32_t sector, void *data);
  * @param data a pointer to 512-bytes of memory (IN)
  * @return 0 on success; <0 on error
  */
-int sector_write(FILE *f, uint32_t sector, const void  *data);
+int sector_write(FILE *f, uint32_t sector, const void *data);
 
 #ifdef __cplusplus
 }

@@ -12,6 +12,15 @@
 #include "sector.h"
 #include "unixv6fs.h"
 
+#define SMALL_FILE_SIZE 8 * SECTOR_SIZE
+#define EXTRA_LARGE_FILE_SIZE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
+
+#define M_REQUIRE_FS_MOUNTED(u) \
+    do{ \
+        M_REQUIRE_NON_NULL(u); \
+        M_REQUIRE_NON_NULL(u->f); \
+    } while(0)
+
 /**
  * @brief open up a file corresponding to a given inode; set offset to zero
  * @param u the filesystem (IN)

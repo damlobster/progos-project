@@ -8,10 +8,9 @@
  * @date summer 2016
  */
 
-#include <stddef.h>
+#include <stddef.h> // for size_t
 #include <stdint.h>
 
-#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,10 +23,7 @@ struct bmblock_array {
     uint64_t bm[1]; // array containing bits
 };
 
-// return the number of bytes per word
-#define BYTES_PER_VECTOR (sizeof(((struct bmblock_array*)0)->bm[0]))
-// return the number of bits per word
-#define BITS_PER_VECTOR (8*BYTES_PER_VECTOR)
+#define BITS_PER_VECTOR (8*sizeof(((struct bmblock_array*)0)->bm[0]))
 
 /**
  * @brief allocate a new bmblock_array to handle elements indexed

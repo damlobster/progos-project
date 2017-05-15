@@ -14,6 +14,9 @@
 #include "unixv6fs.h"
 #include "inode.h"
 
+#define SMALL_FILE_SIZE 8 * SECTOR_SIZE
+#define EXTRA_LARGE_FILE_SIZE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
+
 /**
  * Fill the inodes bitmap
  * @param u the opened file system, not NULL
