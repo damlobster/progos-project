@@ -203,7 +203,7 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
 
     unsigned char sec_buf[SECTOR_SIZE];
     int sec_nb = 0;
-    if (write_from > 0) {
+    if (write_from != 0) {
         // the last sector is not full, fill it
         sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
         if (sec_nb < 0) {
@@ -220,9 +220,11 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
             return ERR_NOMEM;
         }
 
+        memset(sec_buf, 0, SECTOR_SIZE);
         // FIXME handle here the large files: go to indirect addressing
-        fv6->i_node.i_addr[inode_getsize(&fv6->i_node) % SECTOR_SIZE + 1] =
-                (uint16_t) sec_nb;
+        debug_print("filev6_writesector: allocate new sector i->addr[%d]=%d\n",
+                fv6->offset / SECTOR_SIZE, sec_nb);
+        fv6->i_node.i_addr[fv6->offset / SECTOR_SIZE] = (uint16_t) sec_nb;
     }
 
     memcpy(&sec_buf[write_from], buf, bytes_to_write);
@@ -235,6 +237,6 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
     fv6->offset += (int32_t) bytes_to_write;
 
     // set (maybe again) that this sector is used
-    bm_set(u->ibm, (uint64_t) sec_nb);
+    bm_set(u->fbm, (uint64_t) sec_nb);
     return (int) bytes_to_write;
 }

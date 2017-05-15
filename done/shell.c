@@ -316,7 +316,7 @@ int do_mkfs(const char** args) {
     if (sn < 0 || sn > UINT16_MAX) {
         return ERR_BAD_PARAMETER;
     }
-    int err = mountv6_mkfs(args[0], (uint16_t) in, (uint16_t) sn);
+    int err = mountv6_mkfs(args[0], (uint16_t) sn, (uint16_t) in);
     if (err < 0) {
         return err;
     }
@@ -359,12 +359,16 @@ int do_add(const char** args) {
     if (inr < 0) {
         return inr;
     }
+    debug_print("do_add: inr=%d\n", inr);
 
     struct filev6 fv6;
     int err = inode_read(&u, (uint16_t)inr, &fv6.i_node);
     if (err < 0) {
         return err;
     }
+
+    inode_print(&fv6.i_node); // FIXME DEBUG
+
     fv6.i_number = (uint16_t)inr;
     fv6.u = &u;
 
@@ -378,20 +382,24 @@ int do_add(const char** args) {
 
     do {
         read = fread(buf, sizeof(char), 4096, f);
+        debug_print("do_add: read=%zu\n", read);
         if (read > 0) {
             err = filev6_writebytes(&u, &fv6, buf, (int)read);
+            debug_print("do_add: fv6.offset=%d\n", fv6.offset);
             if (err < 0) {
-                fclose(f);
+                if(fclose(f)==EOF){
+                    return ERR_IO;
+                }
                 return err;
             }
         }
     } while (read > 0);
 
-    err = fclose(f);
-    if (err < 0) {
+    debug_print("do_add: write finished%s\n", "");
+    if (fclose(f)==EOF) {
         return ERR_IO;
     }
-    return fv6.offset;
+    return 0;
 }
 
 /**
@@ -441,9 +449,9 @@ int tokenize_input(char* string, const char** args) {
     int i = 0;
     char* arg = strtok(string, " \n");
     args[i] = arg;
-    while (arg != NULL && i <= 3) {
+    while (arg != NULL && i++ < 3) {
         arg = strtok(NULL, " \n");
-        args[++i] = arg;
+        args[i] = arg;
     }
 
     return i - 1;

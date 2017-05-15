@@ -40,6 +40,7 @@ clean:
 	rm -rf *.o $(EXECUTABLE) shell fs test-core test-bitmap
 	
 clean-disks: 
+	rm -rf disks/*
 	cp -f ../provided/disks/* disks/
 
 ## non standard builds

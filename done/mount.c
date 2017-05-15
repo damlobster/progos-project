@@ -211,16 +211,16 @@ int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes)
     }
 
     struct inode inodes_array[INODES_PER_SECTOR];
-    memset(inodes_array, INODES_PER_SECTOR, sizeof(struct inode));
+    memset(inodes_array, 0, SECTOR_SIZE);
     // set root inode mode
-    inodes_array[0].i_mode = IALLOC | IFDIR;
+    inodes_array[ROOT_INUMBER].i_mode = IALLOC | IFDIR;
     err = sector_write(f, sb.s_inode_start, &inodes_array);
     if (err < 0) {
         return err;
     }
 
-    inodes_array[0].i_mode = 0;
-    for (uint32_t i = sb.s_inode_start+1; i < ((uint32_t)sb.s_block_start - 1); i++) {
+    inodes_array[ROOT_INUMBER].i_mode = 0;
+    for (uint32_t i = sb.s_inode_start+1; i <= ((uint32_t)sb.s_block_start - 1); i++) {
         err = sector_write(f, i, &inodes_array);
         if (err < 0) {
             return err;
