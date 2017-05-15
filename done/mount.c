@@ -192,7 +192,7 @@ int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes)
     sb.s_inode_start = SUPERBLOCK_SECTOR + 1;
     sb.s_block_start = (uint16_t)(sb.s_inode_start + sb.s_isize + 1);
 
-    FILE* f = fopen(filename, "wb+");
+    FILE* f = fopen(filename, "wb");
     if (f == NULL) {
         return ERR_IO;
     }
@@ -210,16 +210,18 @@ int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes)
         return err;
     }
 
-    struct inode root = {0};
-    root.i_mode = IALLOC & IFDIR;
-    err = sector_write(f, sb.s_inode_start, &root);
+    struct inode inodes_array[INODES_PER_SECTOR];
+    memset(inodes_array, INODES_PER_SECTOR, sizeof(struct inode));
+    // set root inode mode
+    inodes_array[0].i_mode = IALLOC | IFDIR;
+    err = sector_write(f, sb.s_inode_start, &inodes_array);
     if (err < 0) {
         return err;
     }
 
-    for (uint32_t i = sb.s_inode_start; i < ((uint32_t)sb.s_block_start - 1); i++) {
-        struct inode inode = {0};
-        err = sector_write(f, i, &inode);
+    inodes_array[0].i_mode = 0;
+    for (uint32_t i = sb.s_inode_start+1; i < ((uint32_t)sb.s_block_start - 1); i++) {
+        err = sector_write(f, i, &inodes_array);
         if (err < 0) {
             return err;
         }
