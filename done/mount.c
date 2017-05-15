@@ -220,7 +220,7 @@ int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes)
     }
 
     inodes_array[ROOT_INUMBER].i_mode = 0;
-    for (uint32_t i = sb.s_inode_start+1; i <= ((uint32_t)sb.s_block_start - 1); i++) {
+    for (uint32_t i = (uint32_t)sb.s_inode_start+1; i <= ((uint32_t)sb.s_block_start - 1); i++) {
         err = sector_write(f, i, &inodes_array);
         if (err < 0) {
             return err;

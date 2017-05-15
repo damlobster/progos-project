@@ -249,28 +249,29 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     debug_print("path: %s\n", path);
     debug_print("filename: %s\n", filename);
 
-    //allocate file_inode
+    // allocate file_inode and write it to the disk
     int new_inr = inode_alloc(u);
     if (new_inr < 0) {
         return new_inr;
     }
 
-    struct inode inode = { 0 };
-    inode.i_mode = mode;
-
-    // write it to the disk
-    int err = inode_write(u, (uint16_t) new_inr, &inode);
-    if (err < 0) {
+    struct filev6 file = {.i_number=(uint16_t)new_inr};
+    int err = filev6_create(u, mode, &file);
+    if(err<0){
         return err;
     }
 
+    // update dir entries
+    // first read dir inode
+    struct inode inode = { 0 };
     err = inode_read(u, (uint16_t) parent_dir_inr, &inode);
     if (err < 0) {
         return err;
     }
 
+    // then write the new mapping string-inr
     struct direntv6 dirent;
-    dirent.d_inumber = (uint16_t) new_inr;
+    dirent.d_inumber = (uint16_t) file.i_number;
     strncpy(dirent.d_name, filename, DIRENT_MAXLEN);
 
     struct filev6 fv6 = { .i_node = inode,
@@ -283,6 +284,6 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
 
     debug_print("DIRENTV6_CREATE: new size=%d\n", inode_getsize(&fv6.i_node));
 
-    return new_inr;
+    return file.i_number;
 }
 
