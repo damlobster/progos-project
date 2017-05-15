@@ -37,20 +37,20 @@ Submission accepted
 
 -----
 stderr:
-filev6.c: In function 'filev6_writebytes':
-filev6.c:141:47: warning: unused parameter 'u' [-Wunused-parameter]
+filev6.c: In function ‘filev6_writebytes’:
+filev6.c:141:47: warning: unused parameter ‘u’ [-Wunused-parameter]
  int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
                                                ^
-filev6.c:141:65: warning: unused parameter 'fv6' [-Wunused-parameter]
+filev6.c:141:65: warning: unused parameter ‘fv6’ [-Wunused-parameter]
  int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
                                                                  ^
-filev6.c:141:82: warning: unused parameter 'buf' [-Wunused-parameter]
+filev6.c:141:82: warning: unused parameter ‘buf’ [-Wunused-parameter]
  int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
                                                                                   ^
-filev6.c:141:91: warning: unused parameter 'len' [-Wunused-parameter]
+filev6.c:141:91: warning: unused parameter ‘len’ [-Wunused-parameter]
  int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6, const void *buf, int len){
                                                                                            ^
-shell.c: In function 'do_add':
-shell.c:357:25: warning: unused parameter 'args' [-Wunused-parameter]
+shell.c: In function ‘do_add’:
+shell.c:357:25: warning: unused parameter ‘args’ [-Wunused-parameter]
  int do_add(const char** args) {
                          ^
