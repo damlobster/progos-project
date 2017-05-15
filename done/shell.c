@@ -330,7 +330,7 @@ int do_mkfs(const char** args) {
  * @return
  */
 int do_mkdir(const char** args) {
-    int err = direntv6_create(&u, args[0], IFDIR);
+    int err = direntv6_create(&u, args[0], IFDIR | IALLOC);
     if (err < 0) {
         return err;
     }
@@ -355,7 +355,43 @@ int do_lsall(const char** args) {
  * @return
  */
 int do_add(const char** args) {
-    return SHELL_NOT_IMPLEMENTED;
+    int inr = direntv6_create(&u, args[1], IALLOC);
+    if (inr < 0) {
+        return inr;
+    }
+
+    struct filev6 fv6;
+    int err = inode_read(&u, (uint16_t)inr, &fv6.i_node);
+    if (err < 0) {
+        return err;
+    }
+    fv6.i_number = (uint16_t)inr;
+    fv6.u = &u;
+
+    FILE* f = fopen(args[0], "rb");
+    if (f == NULL) {
+        return ERR_IO;
+    }
+
+    char buf[4096];
+    size_t read = 0;
+
+    do {
+        read = fread(buf, sizeof(char), 4096, f);
+        if (read > 0) {
+            err = filev6_writebytes(&u, &fv6, buf, (int)read);
+            if (err < 0) {
+                fclose(f);
+                return err;
+            }
+        }
+    } while (read > 0);
+
+    err = fclose(f);
+    if (err < 0) {
+        return ERR_IO;
+    }
+    return fv6.offset;
 }
 
 /**

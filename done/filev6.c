@@ -205,7 +205,7 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
     int sec_nb = 0;
     if (write_from > 0) {
         // the last sector is not full, fill it
-        sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset);
+        sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
         if (sec_nb < 0) {
             return sec_nb;
         }
@@ -215,13 +215,13 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
         }
     } else {
         // allocate a new sector
-        sec_nb = bm_find_next(u->ibm);
+        sec_nb = bm_find_next(u->fbm);
         if (sec_nb < 0) {
             return ERR_NOMEM;
         }
 
         // FIXME handle here the large files: go to indirect addressing
-        fv6->i_node.i_addr[inode_getsectorsize(&fv6->i_node) + 1] =
+        fv6->i_node.i_addr[inode_getsize(&fv6->i_node) % SECTOR_SIZE + 1] =
                 (uint16_t) sec_nb;
     }
 
