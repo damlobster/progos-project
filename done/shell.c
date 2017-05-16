@@ -367,8 +367,6 @@ int do_add(const char** args) {
         return err;
     }
 
-    inode_print(&fv6.i_node); // FIXME DEBUG
-
     fv6.i_number = (uint16_t)inr;
     fv6.u = &u;
 
