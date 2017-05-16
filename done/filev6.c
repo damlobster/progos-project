@@ -127,9 +127,9 @@ int filev6_create(struct unix_filesystem *u, uint16_t mode, struct filev6 *fv6) 
     fv6->i_node.i_size0 = 0;
     fv6->i_node.i_size1 = 0;
     memset(fv6->i_node.i_addr, 0,
-    ADDR_SMALL_LENGTH * sizeof(fv6->i_node.i_addr[0]));
-    memset(fv6->i_node.i_atime, 0, 2 * sizeof(fv6->i_node.i_atime[0]));
-    memset(fv6->i_node.i_mtime, 0, 2 * sizeof(fv6->i_node.i_mtime[0]));
+            ADDR_SMALL_LENGTH * sizeof (fv6->i_node.i_addr[0]));
+    memset(fv6->i_node.i_atime, 0, 2 * sizeof (fv6->i_node.i_atime[0]));
+    memset(fv6->i_node.i_mtime, 0, 2 * sizeof (fv6->i_node.i_mtime[0]));
 
     // write the inode to disk
     int err = inode_write(u, fv6->i_number, &fv6->i_node);
@@ -191,6 +191,30 @@ int filev6_writebytes(struct unix_filesystem *u, struct filev6 *fv6,
     return len;
 }
 
+int create_sector(struct unix_filesystem *u, void* data, uint32_t len) {
+    uint8_t new_sector[SECTOR_SIZE];
+    memset(new_sector, 0, SECTOR_SIZE);
+
+    int sec_nb = bm_find_next(u->fbm);
+    if (sec_nb < 0) {
+        return sec_nb;
+    }
+
+    if (data != NULL) {
+        memcpy(new_sector, data, len);
+    }
+
+    int ret = sector_write(u->f, sec_nb, new_sector);
+    if (ret < 0) {
+        return ret;
+    }
+
+    // set (maybe again) that this sector is used
+    bm_set(u->fbm, (uint64_t) sec_nb);
+    
+    return sec_nb;
+}
+
 int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
         const void *buf, uint32_t len) {
     // internal method: no check of arguments validity
@@ -201,42 +225,101 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6,
         bytes_to_write = len;
     }
 
-    unsigned char sec_buf[SECTOR_SIZE];
-    int sec_nb = 0;
+    uint8_t sec_buf[SECTOR_SIZE];
+    int data_sec_nb = 0;
     if (write_from != 0) {
         // the last sector is not full, fill it
-        sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
-        if (sec_nb < 0) {
-            return sec_nb;
+        data_sec_nb = inode_findsector(u, &fv6->i_node, fv6->offset / SECTOR_SIZE);
+        if (data_sec_nb < 0) {
+            return data_sec_nb;
         }
-        int read = sector_read(u->f, (uint32_t) sec_nb, sec_buf);
+        int read = sector_read(u->f, (uint32_t) data_sec_nb, sec_buf);
         if (read < 0) {
             return read;
         }
     } else {
         // allocate a new sector
-        sec_nb = bm_find_next(u->fbm);
-        if (sec_nb < 0) {
+        data_sec_nb = bm_find_next(u->fbm);
+        if (data_sec_nb < 0) {
             return ERR_NOMEM;
         }
+        // set (maybe again) that this sector is used
+        bm_set(u->fbm, (uint64_t) data_sec_nb);
 
         memset(sec_buf, 0, SECTOR_SIZE);
+
+        if (fv6->offset < SMALL_FILE_SIZE) {
+            //petit fichier
+            fv6->i_node.i_addr[fv6->offset / SECTOR_SIZE] = (uint16_t) data_sec_nb;
+        } else {
+            if (fv6->offset == SMALL_FILE_SIZE) {
+                debug_print("création grand fichier\n", NULL);
+
+                uint16_t i_address[9];
+                memcpy(i_address, fv6->i_node.i_addr, ADDR_SMALL_LENGTH * sizeof (uint16_t));
+                i_address[8] = data_sec_nb;
+                //passage à grand
+                int sec_nb = create_sector(u, i_address, (1 + ADDR_SMALL_LENGTH) * sizeof (fv6->i_node.i_addr[0]));
+                if (sec_nb < 0) {
+                    return sec_nb;
+                }
+
+                debug_print("sec_nb: %d\n", sec_nb);
+
+                memset(fv6->i_node.i_addr, 0, ADDR_SMALL_LENGTH * sizeof (fv6->i_node.i_addr[0]));
+                fv6->i_node.i_addr[0] = sec_nb;
+            } else {
+                if (fv6->offset % (ADDRESSES_PER_SECTOR * SECTOR_SIZE) == 0) {
+                    //nouveau secteur indirect
+                    debug_print("nouveau secteur indirect\n", NULL);
+
+                    uint16_t sec_address[1] = {(uint16_t) data_sec_nb};
+                    int sec_nb = create_sector(u, sec_address, 1 * sizeof (uint16_t));
+                    if (sec_nb < 0) {
+                        return sec_nb;
+                    }
+
+                    fv6->i_node.i_addr[fv6->offset / (SECTOR_SIZE * ADDRESSES_PER_SECTOR)] = sec_nb;
+
+                    debug_print("sec_nb: %d\n", sec_nb);
+                } else {
+                    //compléter secteur indirect
+                    debug_print("compléter secteur indirect\n", NULL);
+
+                    uint16_t ind_sec_buf[ADDRESSES_PER_SECTOR];
+                    int sec = fv6->offset / (SECTOR_SIZE * ADDRESSES_PER_SECTOR);
+                    int ret = sector_read(u->f, fv6->i_node.i_addr[sec], ind_sec_buf);
+                    if (ret < 0) {
+                        return ret;
+                    }
+
+                    ind_sec_buf[(fv6->offset / SECTOR_SIZE) % ADDRESSES_PER_SECTOR] = data_sec_nb;
+                    sector_write(u->f, fv6->i_node.i_addr[sec], ind_sec_buf);
+                }
+            }
+        }
         // FIXME handle here the large files: go to indirect addressing
         debug_print("filev6_writesector: allocate new sector i->addr[%d]=%d\n",
-                fv6->offset / SECTOR_SIZE, sec_nb);
-        fv6->i_node.i_addr[fv6->offset / SECTOR_SIZE] = (uint16_t) sec_nb;
+                fv6->offset / SECTOR_SIZE, data_sec_nb);
+
     }
 
     memcpy(&sec_buf[write_from], buf, bytes_to_write);
 
-    int err = sector_write(u->f, (uint32_t) sec_nb, sec_buf);
+    debug_print("data_sec_nb = %d\n", data_sec_nb);
+    int err = sector_write(u->f, (uint32_t) data_sec_nb, sec_buf);
     if (err < 0) {
         return err;
     }
 
     fv6->offset += (int32_t) bytes_to_write;
 
-    // set (maybe again) that this sector is used
-    bm_set(u->fbm, (uint64_t) sec_nb);
+    debug_print("file offset: %d\n", fv6->offset);
+
+#ifdef DEBUG
+    for (int i = 0; i < 8; i++) {
+        debug_print("inode.i_address[%d] = %d\n", i, fv6->i_node.i_addr[i]);
+    }
+#endif
     return (int) bytes_to_write;
 }

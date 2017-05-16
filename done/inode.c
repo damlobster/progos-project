@@ -133,7 +133,7 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
 
     if (isize <= SMALL_FILE_SIZE) {
         //direct addressing
-        debug_print("has sector %d\n", i->i_addr[file_sec_off]);
+        //debug_print("has sector %d\n", i->i_addr[file_sec_off]);
         return i->i_addr[file_sec_off];
     } else if (isize <= EXTRA_LARGE_FILE_SIZE) {
         // indirect addressing
@@ -143,8 +143,8 @@ int inode_findsector(const struct unix_filesystem *u, const struct inode *i,
         if (err != 0) {
             return err;
         }
-        debug_print("inode has sector %d\n",
-                addrs[file_sec_off % ADDRESSES_PER_SECTOR]);
+        /*debug_print("inode has sector %d\n",
+                addrs[file_sec_off % ADDRESSES_PER_SECTOR]);*/
         return addrs[file_sec_off % ADDRESSES_PER_SECTOR];
     } else {
         // extra-large file, not handled

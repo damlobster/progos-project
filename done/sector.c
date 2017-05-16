@@ -23,7 +23,7 @@ int sector_read(FILE *f, uint32_t sector, void *data) {
     M_REQUIRE_NON_NULL(f);
     M_REQUIRE_NON_NULL(data);
 
-    debug_print("SECTOR_READ: sec_nb=%d, byte=%d\n", sector, sector*SECTOR_SIZE);
+    //debug_print("SECTOR_READ: sec_nb=%d, byte=%d\n", sector, sector*SECTOR_SIZE);
 
     if (fseek(f, sector * SECTOR_SIZE, SEEK_SET) != 0) {
         return ERR_IO;
