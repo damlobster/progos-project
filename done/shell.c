@@ -135,20 +135,19 @@ int do_psb(const char** args);
 /**
  * Map of the shell functions
  */
-struct shell_map shell_cmds[] = {
-    { "help", do_help, "display this help", 0, ""}, //
-    { "exit", do_exit, "exit shell", 0, ""}, //
-    { "quit", do_exit, "exit shell", 0, ""}, //
-    { "mkfs", do_mkfs, "create a new filesystem", 3, "<diskname> <#inodes> <#blocks>"}, //
-    { "mount", do_mount, "mount a filesystem", 1, "<diskname>"}, //
-    { "mkdir", do_mkdir, "create a new directory", 1, "<dirname>"}, //
-    { "lsall", do_lsall, "list all directories and files contained in the currently mounted filesystem", 0, ""}, //
-    { "add", do_add, "add a new file", 2, "<src-fullpath> <dst>"}, //
-    { "cat", do_cat, "display the content of a file", 1, "<pathname>"}, //
-    { "istat", do_istat, "display information about the provided inode", 1, "<inode_nr>"}, //
-    { "inode", do_inode, "display the inode number of a file", 1, "<pathname>"}, //
-    { "sha", do_sha, "display the SHA of a file", 1, "<pathname>"}, //
-    { "psb", do_psb, "Print SuperBlock of the currently mounted filesystem", 0, ""} //
+struct shell_map shell_cmds[] = { { "help", do_help, "display this help", 0, "" }, //
+        { "exit", do_exit, "exit shell", 0, "" }, //
+        { "quit", do_exit, "exit shell", 0, "" }, //
+        { "mkfs", do_mkfs, "create a new filesystem", 3, "<diskname> <#inodes> <#blocks>" }, //
+        { "mount", do_mount, "mount a filesystem", 1, "<diskname>" }, //
+        { "mkdir", do_mkdir, "create a new directory", 1, "<dirname>" }, //
+        { "lsall", do_lsall, "list all directories and files contained in the currently mounted filesystem", 0, "" }, //
+        { "add", do_add, "add a new file", 2, "<src-fullpath> <dst>" }, //
+        { "cat", do_cat, "display the content of a file", 1, "<pathname>" }, //
+        { "istat", do_istat, "display information about the provided inode", 1, "<inode_nr>" }, //
+        { "inode", do_inode, "display the inode number of a file", 1, "<pathname>" }, //
+        { "sha", do_sha, "display the SHA of a file", 1, "<pathname>" }, //
+        { "psb", do_psb, "Print SuperBlock of the currently mounted filesystem", 0, "" } //
 };
 
 /**
@@ -157,17 +156,19 @@ struct shell_map shell_cmds[] = {
 enum shell_errors {
     SHELL_ERR_UNMOUNTED_FS = 1, //
     SHELL_ERR_UNDEF_ON_DIR, //
+    SHELL_FILENAME_TOO_LONG,
     SHELL_NOT_IMPLEMENTED
 };
 
 /**
  * Shell errors messages
  */
-const char* SHELL_ERROR_MSGS[] = {"", //
-    "no FS mounted, mount one with: mount <path>", //
-    "this command does not work on a directory", //
-    "not yet implemented" //
-};
+const char* SHELL_ERROR_MSGS[] = { "", //
+        "no FS mounted, mount one with: mount <path>", //
+        "this command does not work on a directory", //
+        "the file name is too long, max lenght=" + DIRENT_MAXLEN, //
+        "not yet implemented" //
+        };
 
 /**
  * Print the error a message in case of error
@@ -195,7 +196,7 @@ int do_istat(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
     inode_print(&in);
 
     return 0;
@@ -232,7 +233,7 @@ int do_sha(const char** args) {
     }
 
     struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
+    M_THROW_ERROR(inode_read(&u, (uint16_t ) inr, &in));
     if (in.i_mode & IFDIR) {
         return SHELL_ERR_UNDEF_ON_DIR;
     } else {
@@ -270,9 +271,8 @@ int do_psb(const char** args) {
  */
 int do_help(const char** args) {
     (void) args;
-    for (size_t i = 0; i < sizeof (shell_cmds) / sizeof (struct shell_map); i++) {
-        printf("    - %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args,
-                shell_cmds[i].help);
+    for (size_t i = 0; i < sizeof(shell_cmds) / sizeof(struct shell_map); i++) {
+        printf("    - %s %s: %s.\n", shell_cmds[i].name, shell_cmds[i].args, shell_cmds[i].help);
     }
 
     return 0;
@@ -361,13 +361,10 @@ int do_add(const char** args) {
     debug_print("do_add: inr=%d\n", inr);
 
     struct filev6 fv6;
-    int err = inode_read(&u, (uint16_t)inr, &fv6.i_node);
+    int err = filev6_open(&u, (uint16_t) inr, &fv6);
     if (err < 0) {
         return err;
     }
-
-    fv6.i_number = (uint16_t)inr;
-    fv6.u = &u;
 
     FILE* f = fopen(args[0], "rb");
     if (f == NULL) {
@@ -381,10 +378,10 @@ int do_add(const char** args) {
         read = fread(buf, sizeof(char), 4096, f);
         debug_print("do_add: read=%zu\n", read);
         if (read > 0) {
-            err = filev6_writebytes(&u, &fv6, buf, (int)read);
+            err = filev6_writebytes(&u, &fv6, buf, (int) read);
             debug_print("do_add: fv6.offset=%d\n", fv6.offset);
             if (err < 0) {
-                if(fclose(f)==EOF){
+                if (fclose(f) == EOF) {
                     return ERR_IO;
                 }
                 return err;
@@ -393,7 +390,7 @@ int do_add(const char** args) {
     } while (read > 0);
 
     debug_print("do_add: write finished%s\n", "");
-    if (fclose(f)==EOF) {
+    if (fclose(f) == EOF) {
         return ERR_IO;
     }
     return 0;
@@ -412,15 +409,14 @@ int do_cat(const char** args) {
         return inr;
     }
 
-    struct inode in;
-    M_THROW_ERROR(inode_read(&u, (uint16_t) inr, &in));
-    if (in.i_mode & IFDIR) {
-        return SHELL_ERR_UNDEF_ON_DIR;
+    struct filev6 fv6;
+    int err = filev6_open(&u, (uint16_t) inr, &fv6);
+    if (err < 0) {
+        return err;
     }
 
-    struct filev6 fv6;
-    if (filev6_open(&u, (uint16_t) inr, &fv6) < 0) {
-        return ERR_IO;
+    if (fv6.i_node.i_mode & IFDIR) {
+        return SHELL_ERR_UNDEF_ON_DIR;
     }
 
     unsigned char sector[SECTOR_SIZE + 1];
@@ -460,7 +456,7 @@ int tokenize_input(char* string, const char** args) {
  * @return the pointer to the command, NULL if no match found
  */
 struct shell_map* get_command(const char* cmd) {
-    for (size_t i = 0; i < sizeof (shell_cmds) / sizeof (struct shell_map); i++) {
+    for (size_t i = 0; i < sizeof(shell_cmds) / sizeof(struct shell_map); i++) {
         if (strcmp(cmd, shell_cmds[i].name) == 0) {
             return &shell_cmds[i];
         }

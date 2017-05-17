@@ -219,9 +219,14 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
         return ERR_FILENAME_ALREADY_EXISTS;
     }
 
-    if (strlen(entry) > MAXPATHLEN_UV6 || entry[0] != '/') {
+    if (entry[0] != '/') {
         // path must start with a slash !
         return ERR_BAD_PARAMETER;
+    }
+
+    if (strlen(entry) > MAXPATHLEN_UV6) {
+        // path must start with a slash !
+        return ERR_FILENAME_TOO_LONG;
     }
 
     char path[MAXPATHLEN_UV6 + 1];

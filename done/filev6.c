@@ -217,14 +217,12 @@ int filev6_writesector(struct unix_filesystem *u, struct filev6 *fv6, const void
 
     // buffer for the data sector
     int data_sec_nb = 0;
-    uint8_t data_buf[SECTOR_SIZE];
-    memset(data_buf, 0, SECTOR_SIZE);
+    uint8_t data_buf[SECTOR_SIZE] = { 0 };
 
     // buffer for the indirect sector
     int write_ind_sec = 0;
     int ind_sec_nb = 0;
-    uint16_t ind_sec_buf[ADDRESSES_PER_SECTOR];
-    memset(ind_sec_buf, 0, SECTOR_SIZE);
+    uint16_t ind_sec_buf[ADDRESSES_PER_SECTOR] = { 0 };
 
     // calculate where to write data
     uint32_t write_from = (uint32_t) fv6->offset % SECTOR_SIZE;
