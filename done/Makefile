@@ -63,9 +63,9 @@ test-bitmap: test-bitmap.o
 tests: test-adding-files build-ourcode-disk
 
 test-adding-files: clean debug
-	rm -f tests/test_files.cmd tests/test_sha.cmd disks/test_files.uv6; \
-	echo "mkfs disks/test_files.uv6 196 8192" > tests/test_files.cmd; \
-	echo "mount disks/test_files.uv6" >> tests/test_files.cmd; \
+	rm -f tests/test_files.cmd tests/test_sha.cmd tests/test_files.uv6; \
+	echo "mkfs tests/test_files.uv6 196 8192" > tests/test_files.cmd; \
+	echo "mount tests/test_files.uv6" >> tests/test_files.cmd; \
 	echo "psb" >> tests/test_files.cmd; \
 	echo "mkdir /tests" >> tests/test_files.cmd; \
 	echo "mkdir /tests/files" >> tests/test_files.cmd
@@ -73,7 +73,7 @@ test-adding-files: clean debug
 	echo "lsall" >> tests/test_files.cmd
 	./shell < tests/test_files.cmd 2>&1 | tee tests/test_files.log
 	make clean all
-	echo "mount disks/test_files.uv6" > tests/test_sha.cmd;
+	echo "mount tests/test_files.uv6" > tests/test_sha.cmd;
 	-ls -1A tests/files/*.txt | sed -e 's:\(.*\):sha \1:' >> tests/test_sha.cmd
 	./shell < tests/test_sha.cmd 2>&1 | sed 's/.* //' | tail -n13 > tests/sha_uv6.log
 	sha256sum tests/files/*.txt | sed 's/ .*//' | tail -n13 > tests/sha_unix.log
