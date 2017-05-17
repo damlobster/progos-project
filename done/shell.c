@@ -10,7 +10,6 @@
 
 #include "direntv6.h"
 #include "mount.h"
-#include "direntv6.h"
 #include "error.h"
 #include "inode.h"
 #include "sha.h"

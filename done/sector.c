@@ -10,7 +10,6 @@
 
 #include "error.h"
 #include "unixv6fs.h"
-#include "mount.h"
 
 /**
  * @brief read one 512-byte sector from the virtual disk

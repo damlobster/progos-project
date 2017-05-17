@@ -95,25 +95,25 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
         return inr;
     }
 
-    struct inode inode;
-    int ret = inode_read(&fs, (uint16_t) inr, &inode);
+    struct filev6 file;
+    int ret = filev6_open(&fs, (uint16_t) inr, &file);
     if (ret < 0) {
         debug_print("fs_getattr 2: %d\n", ret);
         return ret;
     }
 
-    struct timespec atim = { inode.i_atime[0], inode.i_atime[1] };
+    struct timespec atim = { file.i_node.i_atime[0], file.i_node.i_atime[1] };
     stbuf->st_atim = atim;
     stbuf->st_blksize = SECTOR_SIZE;
-    stbuf->st_blocks = inode_getsectorsize(&inode);
+    stbuf->st_blocks = inode_getsectorsize(&file.i_node);
 
     struct timespec ctim = { 0l, 0l };
     stbuf->st_ctim = ctim;
     stbuf->st_dev = 0;
-    stbuf->st_gid = inode.i_gid;
+    stbuf->st_gid = file.i_node.i_gid;
     stbuf->st_ino = (size_t) inr;
 
-    if (inode.i_mode & IFDIR) {
+    if (file.i_node.i_mode & IFDIR) {
         stbuf->st_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
                 | S_IFDIR;
     } else {
@@ -121,12 +121,12 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
                 | S_IFREG;
     }
 
-    struct timespec mtim = { inode.i_mtime[0], inode.i_mtime[1] };
+    struct timespec mtim = { file.i_node.i_mtime[0], file.i_node.i_mtime[1] };
     stbuf->st_mtim = mtim;
-    stbuf->st_nlink = inode.i_nlink;
+    stbuf->st_nlink = file.i_node.i_nlink;
     stbuf->st_rdev = 0;
-    stbuf->st_size = inode_getsize(&inode);
-    stbuf->st_uid = inode.i_uid;
+    stbuf->st_size = inode_getsize(&file.i_node);
+    stbuf->st_uid = file.i_node.i_uid;
 
     debug_print("fs_getattr 3 %s: %d\n", path, res);
 
@@ -193,14 +193,8 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset,
         return inr;
     }
 
-    struct inode in;
-    int ret = inode_read(&fs, (uint16_t) inr, &in);
-    if (ret < 0) {
-        return ret;
-    }
-
-    struct filev6 fv6;
-    ret = filev6_open(&fs, (uint16_t) inr, &fv6);
+    struct filev6 file;
+    int ret = filev6_open(&fs, (uint16_t) inr, &file);
     if (ret < 0) {
         return ret;
     }
@@ -209,8 +203,8 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset,
     sector[SECTOR_SIZE] = '\0';
     int read = 0;
     int total = 0;
-    filev6_lseek(&fv6, (int32_t) offset);
-    while ((read = filev6_readblock(&fv6, sector)) > 0 && total < (int) size) {
+    filev6_lseek(&file, (int32_t) offset);
+    while ((read = filev6_readblock(&file, sector)) > 0 && total < (int) size) {
         memcpy(buf + total, sector, (size_t) read);
         total += read;
     }

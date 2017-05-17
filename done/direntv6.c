@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "error.h"
-#include "inode.h"
 #include "unixv6fs.h"
+#include "filev6.h"
 
 #define MAXPATHLEN_UV6 1024 // max size in chars of a path
 
@@ -23,18 +23,14 @@ int direntv6_opendir(const struct unix_filesystem *u, uint16_t inr,
     M_REQUIRE_NON_NULL(d);
     M_REQUIRE_NON_NULL(u->f);
 
-    // read the inode
-    struct inode inode;
-    int error = inode_read(u, inr, &inode);
+    int error = filev6_open(u, inr, &d->fv6);
     if (error < 0) {
         return error;
     }
-    if (!(inode.i_mode & IFDIR)) {
+    if (!(d->fv6.i_node.i_mode & IFDIR)) {
         // the inode is not a directory
         return ERR_INVALID_DIRECTORY_INODE;
     }
-
-    error = filev6_open(u, inr, &d->fv6);
     d->cur = 0;
     d->last = 0;
 
@@ -73,10 +69,11 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
     char name[DIRENT_MAXLEN + 1];
     memset(name, 0, DIRENT_MAXLEN + 1);
     uint16_t inode_nr;
+    struct filev6 fv6;
     while ((ret = direntv6_readdir(&d, name, &inode_nr)) > 0) {
-        struct inode inode;
-        error = inode_read(u, inode_nr, &inode);
+        error = filev6_open(u, inode_nr, &fv6);
         if (error < 0) {
+            // inode not allocated or other error
             return error;
         }
 
@@ -112,10 +109,8 @@ int direntv6_readdir(struct directory_reader *d, char *name,
         if (read <= 0) {
             return read; // an error occured
         }
-#pragma GCC diagnostic ignored "-Wsign-conversion" // read > 0
-#pragma GCC diagnostic ignored "-Wconversion" // read is max SECTOR_SIZE
-        d->last += read / sizeof(struct direntv6);
-#pragma GCC diagnostic pop
+        d->last = (uint32_t) (d->last
+                + (uint32_t) read / sizeof(struct direntv6));
     }
 
     // get the right DDE
@@ -154,7 +149,9 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
 
     struct directory_reader dr;
     int err = direntv6_opendir(u, inr, &dr);
-    if (err < 0) return err; // cannot open current dir
+    if (err < 0) {
+        return err; // cannot open current dir
+    }
 
     char name[DIRENT_MAXLEN + 1];
     name[DIRENT_MAXLEN] = '\0';
@@ -162,18 +159,24 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
     size_t len = (next == NULL) ? strlen(current) : (size_t) (next - current);
     while (1 == err) {
         err = direntv6_readdir(&dr, name, &inr);
-        if (err < 0) return err;
+        if (err < 0) {
+            return err;
+        }
         if (0 == err) {
             return ERR_INODE_OUTOF_RANGE;
         }
-        if (strncmp(name, current, len) == 0 && strlen(name) == len) err = 0;
+        if (strncmp(name, current, len) == 0 && strlen(name) == len) {
+            err = 0;
+        }
     }
     //at this point a matching inode was found
 
-    struct inode inode;
-    err = inode_read(u, inr, &inode);
-    if (err < 0) return err;
-    if (inode.i_mode & IFDIR) {
+    struct filev6 fv6;
+    err = filev6_open(u, inr, &fv6);
+    if (err < 0) {
+        return err;
+    }
+    if (fv6.i_node.i_mode & IFDIR) {
         // recurce on child dir
         return direntv6_dirlookup_core(u, inr, current + len);
     } else {
@@ -249,22 +252,17 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     debug_print("path: %s\n", path);
     debug_print("filename: %s\n", filename);
 
-    // allocate file_inode and write it to the disk
-    int new_inr = inode_alloc(u);
-    if (new_inr < 0) {
-        return new_inr;
-    }
-
-    struct filev6 file = {.i_number=(uint16_t)new_inr};
+    // create the file inode
+    struct filev6 file;
     int err = filev6_create(u, mode, &file);
-    if(err<0){
+    if (err < 0) {
         return err;
     }
 
     // update dir entries
     // first read dir inode
-    struct inode inode = { 0 };
-    err = inode_read(u, (uint16_t) parent_dir_inr, &inode);
+    struct filev6 parent;
+    err = filev6_open(u, (uint16_t) parent_dir_inr, &parent);
     if (err < 0) {
         return err;
     }
@@ -274,15 +272,12 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     dirent.d_inumber = (uint16_t) file.i_number;
     strncpy(dirent.d_name, filename, DIRENT_MAXLEN);
 
-    struct filev6 fv6 = { .i_node = inode,
-            .i_number = (uint16_t) parent_dir_inr, .offset = 0, .u = u };
-
-    err = filev6_writebytes(u, &fv6, &dirent, sizeof(dirent));
+    err = filev6_writebytes(u, &parent, &dirent, sizeof(dirent));
     if (err < 0) {
         return err;
     }
 
-    debug_print("DIRENTV6_CREATE: new size=%d\n", inode_getsize(&fv6.i_node));
+    debug_print("DIRENTV6_CREATE: full path = \"%s\"\n", entry);
 
     return file.i_number;
 }
