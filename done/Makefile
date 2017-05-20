@@ -88,3 +88,41 @@ build-ourcode-disk: clean debug
 	-ls -1A *.c *.h *.md | sed -e 's:\(.*\):add \1 /src/\1:' >> tests/ourcode.cmd
 	echo "lsall" >> tests/ourcode.cmd
 	./shell < tests/ourcode.cmd 2>&1 | tee tests/ourcode.log
+
+run-all-tests-on-disk:
+	(@echo off; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-inodes:"; \
+	./test-inodes disks/${disk}; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-dirent:"; \
+	./test-dirent disks/${disk}; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-file:"; \
+	./test-file disks/${disk}; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-ibm-fbm:"; \
+	./test-ibm-fbm disks/${disk}; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-bitmap:"; \
+	./test-bitmap; \
+	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	echo "test-ino-cre:"; \
+	./test-ino-cre disks/${disk} ) | tee tests/all-tests-${disk}.log
+	make clean-disks
+	diff -sry --suppress-common-lines ./tests/all-tests-${disk}.log.ref ./tests/all-tests-${disk}.log
+
+run-all-tests:
+	make disk=simple.uv6 run-all-tests-on-disk
+	make disk=aiw.uv6 run-all-tests-on-disk
+	make disk=aiw2.uv6 run-all-tests-on-disk
+	make disk=first.uv6 run-all-tests-on-disk
+
+run-tests-diff-on-disk:
+	diff -sry --suppress-common-lines ./tests/all-tests-${disk}.log.ref ./tests/all-tests-${disk}.log
+
+run-all-tests-diff: 
+	make disk=simple.uv6 run-tests-diff-on-disk
+	make disk=aiw.uv6 run-tests-diff-on-disk
+	make disk=aiw2.uv6 run-tests-diff-on-disk
+	make disk=first.uv6 run-tests-diff-on-disk
