@@ -1,0 +1,226 @@
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-inodes:
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_ibmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+inode   1 (DIR) len   16
+inode   2 (DIR) len   16
+inode   3 (FIL) len   18
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-dirent:
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_ibmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+DIR /
+DIR /tmp/
+FIL /tmp/coucou.txt
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-file:
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_ibmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+
+Printing inode #3:
+**********FS INODE START**********
+i_mode: 32768
+i_nlink: 0
+i_uid: 0
+i_gid: 0
+i_size0: 0
+i_size1: 18
+size: 18
+**********FS INODE END**********
+the first sector of data which contains:
+Coucou le monde !
+
+----
+
+filev6 open failed for inode #5.
+
+Listing inodes SHA:
+SHA inode 1: no SHA for directories.
+SHA inode 2: no SHA for directories.
+SHA inode 3: 338fc4bb0d037f3747396a4c852d2a9d8b545d622c6c744c670cf95f715731d3
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-ibm-fbm:
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_ibmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+### fbm:
+**********BitMap Block START**********
+length: 16
+min: 35
+max: 1024
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 11100000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+001: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+002: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+003: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+004: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+005: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+006: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+007: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+008: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+009: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+010: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+011: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+012: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+013: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+014: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+015: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+**********BitMap Block END************
+### ibm:
+**********BitMap Block START**********
+length: 8
+min: 2
+max: 512
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 11000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+001: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+002: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+003: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+004: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+005: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+006: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+007: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+**********BitMap Block END************
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-bitmap:
+**********BitMap Block START**********
+length: 2
+min: 4
+max: 131
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+001: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+**********BitMap Block END************
+find_next() = 4
+**********BitMap Block START**********
+length: 2
+min: 4
+max: 131
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 11100000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+001: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+**********BitMap Block END************
+find_next() = 7
+**********BitMap Block START**********
+length: 2
+min: 4
+max: 131
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 11110010 01001001 00100100 10010010 01001001 00100100 10010010 01001001 
+001: 00100100 10010010 01001001 00100100 10010010 01001001 00100100 10010010 
+**********BitMap Block END************
+find_next() = 8
+**********BitMap Block START**********
+length: 2
+min: 4
+max: 131
+cursor: 0
+content:
+     0      7       15       23       31       39       45       55       63
+000: 10110000 01001001 00100000 10010010 01000001 00100100 10000010 01001001 
+001: 00000100 10010010 00001001 00100100 00010010 01001000 00100100 10010000 
+**********BitMap Block END************
+find_next() = 5
+bm_cursor=2, last bit=131
+**********BitMap Block START**********
+length: 2
+min: 4
+max: 131
+cursor: 2
+content:
+     0      7       15       23       31       39       45       55       63
+000: 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
+001: 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
+**********BitMap Block END************
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test-ino-cre:
+**********FS SUPERBLOCK START**********
+s_isize             : 32
+s_fsize             : 1024
+s_fbmsize           : 0
+s_ibmsize           : 0
+s_inode_start       : 2
+s_block_start       : 34
+s_fbm_start         : 0
+s_ibm_start         : 0
+s_flock             : 0
+s_ilock             : 0
+s_fmod              : 0
+s_ronly             : 0
+s_time              : [0] 0
+**********FS SUPERBLOCK END**********
+INODE 12 should be a FILE!
+inode   1 (DIR) len   16
+inode   2 (DIR) len   16
+inode   3 (FIL) len   18
+inode  12 (FIL) len    0
+INODE 12 should be a DIR!
+inode   1 (DIR) len   16
+inode   2 (DIR) len   16
+inode   3 (FIL) len   18
+inode  12 (DIR) len    0
+INODE 12 shouldn't be ALLOCATED!
+inode   1 (DIR) len   16
+inode   2 (DIR) len   16
+inode   3 (FIL) len   18
