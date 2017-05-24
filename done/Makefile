@@ -89,7 +89,7 @@ build-ourcode-disk: clean debug
 	echo "lsall" >> tests/ourcode.cmd
 	./shell < tests/ourcode.cmd 2>&1 | tee tests/ourcode.log
 
-run-all-tests-on-disk:
+run-all-tests-on-disk: clean debug
 	(@echo off; \
 	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
 	echo "test-inodes:"; \
