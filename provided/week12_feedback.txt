@@ -1,0 +1,148 @@
+Submission accepted
+
+stdout:
+making (our) test-inodes: 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code bmblock.c -o bmblock.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code inode.c -o inode.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sector.c -o sector.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code error.c -o error.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code sha.c -o sha.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code direntv6.c -o direntv6.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code mount.c -o mount.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code filev6.c -o filev6.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-core.c -o test-core.o 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-inodes.c -o test-inodes.o 
+gcc bmblock.o inode.o sector.o error.o sha.o direntv6.o mount.o filev6.o test-core.o test-inodes.o -o test-inodes -lcrypto 
+test-inodes done.
+making (our) test-file: 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-file.c -o test-file.o 
+gcc bmblock.o inode.o sector.o error.o sha.o direntv6.o mount.o filev6.o test-core.o test-file.o -o test-file -lcrypto 
+test-file done.
+making (our) test-dirent: 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-dirent.c -o test-dirent.o 
+gcc bmblock.o inode.o sector.o error.o sha.o direntv6.o mount.o filev6.o test-core.o test-dirent.o -o test-dirent -lcrypto 
+test-dirent done.
+making (our) test-bitmap: 
+gcc -D_DEFAULT_SOURCE -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o test-bitmap.o -c test-bitmap.c
+gcc bmblock.o -lcrypto test-bitmap.o -o test-bitmap
+test-bitmap done.
+=====
+testing our test-inodes on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-inodes on disk aiw.uv6: done.
+diff from reference:
+=====
+testing our test-file on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-file on disk aiw.uv6: done.
+diff from reference:
+=====
+testing our test-dirent on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-dirent on disk aiw.uv6: done.
+diff from reference:
+=====
+testing our test-bitmap on disk simple.uv6: done.
+diff from reference:
+=====
+testing our test-bitmap on disk aiw.uv6: done.
+diff from reference:
+=====
+making (your) shell: 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-ibm-fbm.c -o test-ibm-fbm.o 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o test-core.o test-ibm-fbm.o -o test-ibm-fbm -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code test-ino-cre.c -o test-ino-cre.o 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o test-core.o test-ino-cre.o -o test-ino-cre -lcrypto 
+gcc -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code shell.c -o shell.o 
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o shell.o -o shell -lcrypto 
+gcc -D_DEFAULT_SOURCE $(pkg-config fuse --cflags) -std=c11 -c -Wall -pedantic -Wextra -Wfloat-equal -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wunreachable-code -o fs.o -c fs.c
+gcc bmblock.o sha.o mount.o error.o sector.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+shell done.
+testing your shell: 
+done.
+diff from reference:
+3,4c3,4
+< >>> ERROR SHELL: no FS mounted, mount one with: mount <path>
+< >>> ERROR FS: IO error
+---
+> >>> ERROR SHELL: mount the FS before the operation
+> >>> ERROR FS: IO error: No such file or directory
+49c49
+<     - mount <diskname>: mount a filesystem.
+---
+> 	- mount <diskname>: mount the provided filesystem.
+80d79
+< DIR /tmp/
+92,100c91
+< >>> **********FS INODE START**********
+< i_mode: 49152
+< i_nlink: 0
+< i_uid: 0
+< i_gid: 0
+< i_size0: 0
+< i_size1: 0
+< size: 0
+< **********FS INODE END**********
+---
+> >>> ERROR FS: unallocated inode
+404,405c395
+< >>> ERROR FS: IO error
+< >>> DIR /
+---
+> >>> >>> DIR /
+417,418c407,408
+< i_size1: 0
+< size: 0
+---
+> i_size1: 616
+> size: 616 
+419a410,442
+> >>> lsall
+> mount bidon142857.
+> mount /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
+> lsall
+> cat /tmp/coucou.txt
+> istat 2
+> istat 3
+> inode /tmp
+> inode /tmp/coucou.txt
+> psb
+> help
+> sha /tmp/coucou.txt
+> mount /home/whitlock/pps/Dev2017/mainprj/disks/aiw.uv6
+> lsall
+> sha /books/aiw/full/11-0.txt
+> inode /books/aiw/by_chapters/11-0-c11.txt
+> istat 19
+> istat 22
+> cat /books/aiw/by_chapters/11-0-c08.txt
+> mkfs bidon 128 1024
+> mount bidon
+> lsall
+> mkdir /tmp
+> lsall
+> add shell_cmd.txt /tmp/abcd.txt
+> lsall
+> inode /
+> inode /tmp
+> inode /tmp/abcd.txt
+> istat 3
+> cat /tmp/abcd.txt
+> quit
+> 
+421d443
+< >>> >>> 
+\ No newline at end of file
+
+=====
+testing mkfs: ERROR: Disk "bidon" does not have the right size (7680 bytes)
+=====
+making (your) fs: 
+gcc bmblock.o sha.o mount.o sector.o error.o direntv6.o filev6.o inode.o -lcrypto fs.o -o fs $(pkg-config fuse --libs)
+fs done.
+
+-----
+stderr:
