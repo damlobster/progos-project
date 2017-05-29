@@ -74,32 +74,18 @@ diff from reference:
 <     - mount <diskname>: mount a filesystem.
 ---
 > 	- mount <diskname>: mount the provided filesystem.
-80d79
-< DIR /tmp/
-92,100c91
-< >>> **********FS INODE START**********
-< i_mode: 49152
-< i_nlink: 0
-< i_uid: 0
-< i_gid: 0
-< i_size0: 0
-< i_size1: 0
-< size: 0
-< **********FS INODE END**********
----
-> >>> ERROR FS: unallocated inode
-404,405c395
+395,396c395
 < >>> ERROR FS: IO error
 < >>> DIR /
 ---
 > >>> >>> DIR /
-417,418c407,408
+408,409c407,408
 < i_size1: 0
 < size: 0
 ---
 > i_size1: 616
 > size: 616 
-419a410,442
+410a410,442
 > >>> lsall
 > mount bidon142857.
 > mount /home/whitlock/pps/Dev2017/mainprj/disks/simple.uv6
@@ -133,7 +119,7 @@ diff from reference:
 > cat /tmp/abcd.txt
 > quit
 > 
-421d443
+412d443
 < >>> >>> 
 \ No newline at end of file
 
