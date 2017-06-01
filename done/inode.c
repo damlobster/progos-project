@@ -189,7 +189,7 @@ int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
     // local function, don't check args validity
 
     long unsigned int sector_to_read = M_INODE_GET_SECTOR_ADDR(u, inr);
-    if (sector_to_read > u->s.s_isize) {
+    if (sector_to_read >= u->s.s_isize) {
         return ERR_INODE_OUTOF_RANGE;
     }
 

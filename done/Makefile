@@ -85,7 +85,8 @@ build-ourcode-disk: clean debug
 	echo "mount ourcode.uv6" >> tests/ourcode.cmd; \
 	echo "psb" >> tests/ourcode.cmd; \
 	echo "mkdir /src" >> tests/ourcode.cmd
-	-ls -1A *.c *.h *.md | sed -e 's:\(.*\):add \1 /src/\1:' >> tests/ourcode.cmd
+	-ls -1A *.c *.h | sed -e 's:\(.*\):add \1 /src/\1:' >> tests/ourcode.cmd
+	echo "add README.md /README.md" >> tests/ourcode.cmd
 	echo "lsall" >> tests/ourcode.cmd
 	./shell < tests/ourcode.cmd 2>&1 | tee tests/ourcode.log
 

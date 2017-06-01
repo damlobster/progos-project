@@ -67,7 +67,7 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
         return error;
     }
 
-    // caclulate the bytes read
+    // calculate the size of the last sector
     int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;
@@ -75,8 +75,10 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
 
     int read;
     if (fv6->offset == inode_getsize(&fv6->i_node) - last_sector_size) {
+        // we read the last sector
         read = last_sector_size;
     } else {
+        // we read a "normal" sector
         read = SECTOR_SIZE;
     }
 
