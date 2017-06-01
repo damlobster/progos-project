@@ -1,0 +1,43 @@
+help
+
+#### tests without a filesystem mounted
+lsall
+cat klsdfj
+istat 23
+inode sdfkj
+sha asidj
+psb
+mount sdkljf
+
+#### tests with a file system
+mount disks/first.uv6
+
+psb
+
+cat kjladf
+cat /hello/os/user/user.go
+
+istat /
+istat 23
+istat jkf
+
+inode /
+inode hello/
+inode /hello/os/user/user.go
+inode dfkdjfkdj
+
+sha dfjk
+sha /
+sha /hello/
+sha /hello/os/user/user.go
+sha /hello/os/user/lookup_unix.go
+
+#### testing dirent_dirlookup via inode command
+inode /hello/os/user/u????
+inode /hello/os/user/user.go/
+inode /hello/os/user/u
+inode /hello/os/user/user.go
+inode hello/os/user/user.go
+inode /////hello//os/user////user.go
+inode /hello/os/user
+inode /hello/os/user/////
