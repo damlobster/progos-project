@@ -107,13 +107,14 @@ int direntv6_readdir(struct directory_reader *d, char *name,
     if (d->cur == d->last) {
         int read = filev6_readblock(&d->fv6, d->dirs);
         if (read <= 0) {
-            return read; // an error occured
+            // an error occured or nothing to read
+            return read;
         }
         d->last = (uint32_t) (d->last
                 + (uint32_t) read / sizeof(struct direntv6));
     }
 
-    // get the right DDE
+    // get the right directory entry
     struct direntv6 *curdir = &d->dirs[d->cur % DIRENTRIES_PER_SECTOR];
     strncpy(name, curdir->d_name, DIRENT_MAXLEN);
     // and set the child inode number

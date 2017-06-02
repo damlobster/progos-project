@@ -14,8 +14,14 @@
 #define SMALL_FILE_SIZE 8 * SECTOR_SIZE
 #define EXTRA_LARGE_FILE_SIZE 7 * ADDRESSES_PER_SECTOR * SECTOR_SIZE
 
-#define M_INODE_GET_SECTOR_ADDR(u, inr) (u->s.s_inode_start + (uint32_t)(inr / INODES_PER_SECTOR))
-#define M_INODE_GET_INDEX_IN_SECTOR(inr) (inr % INODES_PER_SECTOR)
+#define M_INODE_GET_SECTOR_ADDR(u, inr) ((u)->s.s_inode_start + (uint32_t)((inr) / INODES_PER_SECTOR))
+#define M_INODE_GET_INDEX_IN_SECTOR(inr) ((inr) % INODES_PER_SECTOR)
+
+#define M_VALIDATE_INR(u, inr) do { \
+        if ((inr) > (u)->s.s_isize*INODES_PER_SECTOR) { \
+            return ERR_INODE_OUTOF_RANGE; \
+        } \
+    } while(0)
 
 /**
  * Read all inodes that are part of the same sector containing inode nb 'inr'
@@ -37,7 +43,7 @@ int inode_scan_print(const struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(u);
 
     // loop on all inode sectors
-    for (uint32_t k = u->s.s_inode_start; k < u->s.s_isize; k++) {
+    for (uint32_t k = u->s.s_inode_start; k < u->s.s_inode_start + u->s.s_isize; k++) {
 
         struct inode inodes[INODES_PER_SECTOR];
         int error = sector_read(u->f, k, inodes);
@@ -49,11 +55,10 @@ int inode_scan_print(const struct unix_filesystem *u) {
             if (inodes[i].i_mode & IALLOC) {
                 // inode is allocated --> print it
                 int size = inode_getsize(&inodes[i]);
-                const char *type = (inodes[i].i_mode & IFDIR) ?
-                SHORT_DIR_NAME :
-                                                                SHORT_FIL_NAME;
+                const char* type = (inodes[i].i_mode & IFDIR) ?
+                        SHORT_DIR_NAME : SHORT_FIL_NAME;
                 printf("inode %3zu (%s) len %4d\n",
-                        i + (k - 2) * INODES_PER_SECTOR, type, size);
+                        i + (k - 2) * INODES_PER_SECTOR, type, size); //FIXME corrector: why -2????
             }
         }
     }
@@ -92,6 +97,7 @@ int inode_read(const struct unix_filesystem *u, uint16_t inr,
         struct inode *inode) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
+    M_VALIDATE_INR(u, inr);
 
     struct inode inodes[INODES_PER_SECTOR];
     int err = inode_read_many(u, inr, inodes);
@@ -164,6 +170,7 @@ int inode_write(struct unix_filesystem *u, uint16_t inr,
         const struct inode *inode) {
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(inode);
+    M_VALIDATE_INR(u, inr);
 
     struct inode inodes[INODES_PER_SECTOR];
     int err = inode_read_many(u, inr, inodes);
@@ -189,10 +196,6 @@ int inode_read_many(const struct unix_filesystem *u, uint16_t inr,
     // local function, don't check args validity
 
     long unsigned int sector_to_read = M_INODE_GET_SECTOR_ADDR(u, inr);
-    if (sector_to_read >= u->s.s_isize) {
-        return ERR_INODE_OUTOF_RANGE;
-    }
-
     int error = sector_read(u->f, (uint16_t) sector_to_read, inodes);
     return error; // propagate sector_read error
 }

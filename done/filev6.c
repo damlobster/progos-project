@@ -32,12 +32,15 @@ int filev6_open(const struct unix_filesystem *u, uint16_t inr, struct filev6 *fv
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(fv6);
 
+    int error = inode_read(u, inr, &fv6->i_node);
+    if(error<0){
+        return error;
+    }
+
     fv6->u = u;
     fv6->i_number = inr;
-    int error = inode_read(u, inr, &fv6->i_node);
     fv6->offset = 0;
-
-    return error;
+    return 0;
 }
 
 /**
@@ -51,7 +54,13 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
     M_REQUIRE_NON_NULL(fv6->u);
     M_REQUIRE_NON_NULL(buf);
 
-    if (fv6->offset >= inode_getsize(&fv6->i_node)) {
+    const int32_t isize = inode_getsize(&fv6->i_node);
+
+    if (isize < fv6->offset) {
+        // invalid offset !
+        return ERR_OFFSET_OUT_OF_RANGE;
+    }
+    if (isize == fv6->offset) {
         // already at the end of file --> read nothing !
         return 0;
     }
@@ -68,13 +77,13 @@ int filev6_readblock(struct filev6 *fv6, void *buf) {
     }
 
     // calculate the size of the last sector
-    int last_sector_size = inode_getsize(&fv6->i_node) % SECTOR_SIZE;
+    int last_sector_size = isize % SECTOR_SIZE;
     if (last_sector_size == 0) {
         last_sector_size = SECTOR_SIZE;
     }
 
     int read;
-    if (fv6->offset == inode_getsize(&fv6->i_node) - last_sector_size) {
+    if (fv6->offset == isize - last_sector_size) {
         // we read the last sector
         read = last_sector_size;
     } else {

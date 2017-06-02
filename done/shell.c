@@ -345,7 +345,7 @@ int do_lsall(const char** args) {
     (void) args;
     FS_MOUNTED;
 
-    return direntv6_print_tree(&u, 1, "");
+    return direntv6_print_tree(&u, ROOT_INUMBER, "");
 }
 
 /**
