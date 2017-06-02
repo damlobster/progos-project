@@ -77,10 +77,10 @@ int mountv6(const char *filename, struct unix_filesystem *u) {
  * @param u - the mounted filesytem
  */
 void mountv6_print_superblock(const struct unix_filesystem *u) {
+    puts("**********FS SUPERBLOCK START**********");
     if (u == NULL) {
         puts("NULL");
     } else {
-        puts("**********FS SUPERBLOCK START**********");
         printf("s_isize             : %" PRIu16 "\n", u->s.s_isize);
         printf("s_fsize             : %" PRIu16 "\n", u->s.s_fsize);
         printf("s_fbmsize           : %" PRIu16 "\n", u->s.s_fbmsize);
@@ -94,8 +94,8 @@ void mountv6_print_superblock(const struct unix_filesystem *u) {
         printf("s_fmod              : %" PRIu8 "\n", u->s.s_fmod);
         printf("s_ronly             : %" PRIu8 "\n", u->s.s_ronly);
         printf("s_time              : [0] %" PRIu16 "\n", u->s.s_time[0]);
-        puts("**********FS SUPERBLOCK END**********");
     }
+    puts("**********FS SUPERBLOCK END**********");
 }
 
 /**
