@@ -402,7 +402,7 @@ struct shell_map* get_command(const char* cmd) {
     return NULL;
 }
 
-int main(void) {//correcteur : 1pt malus for non-anonymous copy
+int main(void) {
     const char* args[4];
 
     puts("Shell interpretor\nType \"help\" for more information.");
