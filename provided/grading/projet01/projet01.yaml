@@ -1,18 +1,18 @@
 - id: no-id
 - nb tests passes: 31 
-- Makefile:                     0        # max 3
-- unixv6fs.h, struct inode:        0     # max 2.25
-- direntv6.h, struct directory_reader: 0 # max 1
-- sector.c (sector_read):          0     # max 2.5
+- Makefile:                      3      # max 3
+- unixv6fs.h, struct inode:        2.25     # max 2.25
+- direntv6.h, struct directory_reader: 1 # max 1
+- sector.c (sector_read):            2.5   # max 2.5
 - mount.c:
     - mountv6:                 4.5   # max 5
     - mountv6_print_superblock:  2.5 # max 2.5
     - umountv6:                 2.5  # max 2.5
 - inode.c:
-    - inode_scan_print: 0  # max 5
-    - inode_print:      0  # max 2.5
-    - inode_read:       0  # max 5
-    - inode_findsector:  0 # max 10
+    - inode_scan_print: 3.25  # max 5
+    - inode_print:      2.5  # max 2.5
+    - inode_read:       4.5  # max 5
+    - inode_findsector:  8.75 # max 10
 - filev6.c:
     - filev6_open:        2   # max 2.5
     - filev6_readblock:   4.5   # max 5
@@ -40,8 +40,8 @@
     - commande psb:                  2.5   # max 2.5
     - mécanisme degestion des erreurs: 2.5 # max 2.5
     - main():                    5       # max 5
-- test-dirent.c:  0 # max 2.5
-- test-file.c:   0  # max 5
-- test-inodes.c: 0  # max 2.5
+- test-dirent.c:  2.25 # max 2.5
+- test-file.c:   3.75  # max 5
+- test-inodes.c: 2.5  # max 2.5
 - style:     2   # max 2
-- bonus/malus: -3 # max 5, min -5
+- bonus/malus: -1 # max 5, min -5
