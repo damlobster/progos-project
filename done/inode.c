@@ -43,10 +43,10 @@ int inode_scan_print(const struct unix_filesystem *u) {
     M_REQUIRE_NON_NULL(u);
 
     // loop on all inode sectors
-    for (uint32_t k = u->s.s_inode_start; k < u->s.s_inode_start + u->s.s_isize; k++) {
+    for (uint32_t k = 0; k < u->s.s_isize; k++) {
 
         struct inode inodes[INODES_PER_SECTOR];
-        int error = sector_read(u->f, k, inodes);
+        int error = sector_read(u->f, u->s.s_inode_start + k, inodes);
         if (error != 0) return error; // propagate sector_read error code if any
 
         // loop on all inode of the current sector
@@ -57,8 +57,8 @@ int inode_scan_print(const struct unix_filesystem *u) {
                 int size = inode_getsize(&inodes[i]);
                 const char* type = (inodes[i].i_mode & IFDIR) ?
                         SHORT_DIR_NAME : SHORT_FIL_NAME;
-                printf("inode %3zu (%s) len %4d\n",
-                        i + (k - 2) * INODES_PER_SECTOR, type, size); //FIXME corrector: why -2????
+                printf("inode %3zu (%s) len %4d\n", 
+                       i + (k * INODES_PER_SECTOR), type, size);
             }
         }
     }
