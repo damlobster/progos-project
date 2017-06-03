@@ -91,8 +91,7 @@ build-ourcode-disk: clean debug
 	./shell < tests/ourcode.cmd 2>&1 | tee tests/ourcode.log
 
 run-all-tests-on-disk: clean debug
-	(@echo off; \
-	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
+	(echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
 	echo "test-inodes:"; \
 	./test-inodes disks/${disk}; \
 	echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; \
@@ -114,16 +113,16 @@ run-all-tests-on-disk: clean debug
 	diff -sry --suppress-common-lines ./tests/all-tests-${disk}.log.ref ./tests/all-tests-${disk}.log
 
 run-all-tests:
-	make disk=simple.uv6 run-all-tests-on-disk
-	make disk=aiw.uv6 run-all-tests-on-disk
-	make disk=aiw2.uv6 run-all-tests-on-disk
-	make disk=first.uv6 run-all-tests-on-disk
+	@make -s disk=simple.uv6 run-all-tests-on-disk
+	@make -s disk=aiw.uv6 run-all-tests-on-disk
+	@make -s disk=aiw2.uv6 run-all-tests-on-disk
+	@make -s disk=first.uv6 run-all-tests-on-disk
 
 run-tests-diff-on-disk:
-	diff -sry --suppress-common-lines ./tests/all-tests-${disk}.log.ref ./tests/all-tests-${disk}.log
+	diff -sy --suppress-common-lines ./tests/all-tests-${disk}.log.ref ./tests/all-tests-${disk}.log
 
 run-all-tests-diff: 
-	make disk=simple.uv6 run-tests-diff-on-disk
-	make disk=aiw.uv6 run-tests-diff-on-disk
-	make disk=aiw2.uv6 run-tests-diff-on-disk
-	make disk=first.uv6 run-tests-diff-on-disk
+	@make -s disk=simple.uv6 run-tests-diff-on-disk
+	@make -s disk=aiw.uv6 run-tests-diff-on-disk
+	@make -s disk=aiw2.uv6 run-tests-diff-on-disk
+	@make -s disk=first.uv6 run-tests-diff-on-disk
