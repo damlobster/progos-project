@@ -89,7 +89,7 @@ static int fs_getattr(const char *path, struct stat *stbuf) {
 
     memset(stbuf, 0, sizeof(struct stat));
 
-    int inr = direntv6_dirlookup(&fs, 1, path);
+    int inr = direntv6_dirlookup(&fs, ROOT_INUMBER, path);
     if (inr < 0) {
         debug_print("fs_getattr 1 %s: %d\n", path, inr);
         return inr;
@@ -150,7 +150,7 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     filler(buf, ".", NULL, 0);
     filler(buf, "..", NULL, 0);
 
-    int inr = direntv6_dirlookup(&fs, 1, path);
+    int inr = direntv6_dirlookup(&fs, ROOT_INUMBER, path);
     if (inr < 0) {
         debug_print("fs_readdir 1: %d\n", inr);
         return inr;
@@ -188,7 +188,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset,
         struct fuse_file_info *fi) {
     (void) fi;
 
-    int inr = direntv6_dirlookup(&fs, 1, path);
+    int inr = direntv6_dirlookup(&fs, ROOT_INUMBER, path);
     if (inr < 0) {
         return inr;
     }

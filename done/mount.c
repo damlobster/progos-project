@@ -201,11 +201,11 @@ int mountv6_mkfs(const char* filename, uint16_t num_blocks, uint16_t num_inodes)
     memset(b_block, 0, SECTOR_SIZE);
     b_block[BOOTBLOCK_MAGIC_NUM_OFFSET] = BOOTBLOCK_MAGIC_NUM;
 
-    int err = sector_write(f, 0, b_block);
+    int err = sector_write(f, BOOTBLOCK_SECTOR, b_block);
     if (err < 0) {
         return err;
     }
-    err = sector_write(f, 1, &sb);
+    err = sector_write(f, SUPERBLOCK_SECTOR, &sb);
     if (err < 0) {
         return err;
     }

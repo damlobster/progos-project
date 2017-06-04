@@ -46,6 +46,7 @@ void _print_inode(const struct unix_filesystem *u, uint16_t inr){
     int err = filev6_open(u, inr, &fv6);
     if (err != 0) {
         printf("filev6 open failed for inode #%d.\n", inr);
+        return;
     } else {
         printf("Printing inode #%d:\n", inr);
         struct inode* inode = &fv6.i_node;
@@ -60,7 +61,6 @@ void _print_inode(const struct unix_filesystem *u, uint16_t inr){
 
             err = filev6_readblock(&fv6, data);
             if(err<0){
-                printf("ERROR reading sector 0: %s\n", ERR_MESSAGES[err - ERR_FIRST]);
                 return;
             }
 
@@ -68,4 +68,6 @@ void _print_inode(const struct unix_filesystem *u, uint16_t inr){
             puts("----");
         }
     }
+
+    return;
 }

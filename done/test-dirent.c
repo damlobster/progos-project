@@ -14,5 +14,5 @@
  * @return <0 if error occured
  */
 int test(const struct unix_filesystem *u) {
-    return direntv6_print_tree(u, 1, "");
+    return direntv6_print_tree(u, ROOT_INUMBER, "");
 }

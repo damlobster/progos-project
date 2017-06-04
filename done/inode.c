@@ -71,10 +71,10 @@ int inode_scan_print(const struct unix_filesystem *u) {
  * @param inode the inode structure to be displayed
  */
 void inode_print(const struct inode *inode) {
+    puts("**********FS INODE START**********");
     if (inode == NULL) {
         puts("NULL");
     } else {
-        puts("**********FS INODE START**********");
         printf("i_mode: %" PRIu16 "\n", inode->i_mode);
         printf("i_nlink: %" PRIu8 "\n", inode->i_nlink);
         printf("i_uid: %" PRIu8 "\n", inode->i_uid);
@@ -82,8 +82,8 @@ void inode_print(const struct inode *inode) {
         printf("i_size0: %" PRIu8 "\n", inode->i_size0);
         printf("i_size1: %" PRIu16 "\n", inode->i_size1);
         printf("size: %" PRIu32 "\n", inode_getsize(inode));
-        puts("**********FS INODE END**********");
     }
+    puts("**********FS INODE END**********");
 }
 
 /**

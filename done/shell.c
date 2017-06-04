@@ -210,7 +210,7 @@ int do_istat(const char** args) {
 int do_inode(const char** args) {
     FS_MOUNTED;
 
-    int inr = direntv6_dirlookup(&u, 1, args[0]);
+    int inr = direntv6_dirlookup(&u, ROOT_INUMBER, args[0]);
     if (inr < 0) {
         return inr;
     }
@@ -227,7 +227,7 @@ int do_inode(const char** args) {
 int do_sha(const char** args) {
     FS_MOUNTED;
 
-    int inr = direntv6_dirlookup(&u, 1, args[0]);
+    int inr = direntv6_dirlookup(&u, ROOT_INUMBER, args[0]);
     if (inr < 0) {
         return inr;
     }
@@ -371,6 +371,7 @@ int do_add(const char** args) {
         return ERR_IO;
     }
 
+    // we have choosen to write file not in one go but by chunks
     char buf[4096];
     size_t read = 0;
 
@@ -404,7 +405,7 @@ int do_add(const char** args) {
 int do_cat(const char** args) {
     FS_MOUNTED;
 
-    int inr = direntv6_dirlookup(&u, 1, args[0]);
+    int inr = direntv6_dirlookup(&u, ROOT_INUMBER, args[0]);
     if (inr < 0) {
         return inr;
     }
@@ -421,12 +422,12 @@ int do_cat(const char** args) {
 
     unsigned char sector[SECTOR_SIZE + 1];
     sector[SECTOR_SIZE] = '\0';
-    while (filev6_readblock(&fv6, sector) > 0) {
+    while ((err = filev6_readblock(&fv6, sector)) > 0) {
         printf("%s", sector);
     }
     putchar('\n');
 
-    return 0;
+    return err;
 }
 
 /**
