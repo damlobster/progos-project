@@ -10,6 +10,8 @@
 
 #define MAXPATHLEN_UV6 1024 // max size in chars of a path
 
+const char PATH_SEP[2] = { PATH_TOKEN, '\0' };
+
 /**
  * @brief opens a directory reader for the specified inode 'inr'
  * @param u the mounted filesystem
@@ -65,12 +67,11 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
     }
 
     //handle the children of the current directory
-    int ret;
     char name[DIRENT_MAXLEN + 1];
     memset(name, 0, DIRENT_MAXLEN + 1);
     uint16_t inode_nr;
     struct filev6 fv6;
-    while ((ret = direntv6_readdir(&d, name, &inode_nr)) > 0) {
+    while ((error = direntv6_readdir(&d, name, &inode_nr)) > 0) {
         error = filev6_open(u, inode_nr, &fv6);
         if (error < 0) {
             // inode not allocated or other error
@@ -81,14 +82,17 @@ int direntv6_print_tree(const struct unix_filesystem *u, uint16_t inr,
         char new_prefix[MAXPATHLEN_UV6];
         memset(new_prefix, 0, MAXPATHLEN_UV6);
         strncat(new_prefix, prefix, MAXPATHLEN_UV6 - 1);
-        strncat(new_prefix, "/", MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
+        strncat(new_prefix, PATH_SEP, MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
         strncat(new_prefix, name, MAXPATHLEN_UV6 - strlen(new_prefix) - 1);
 
         // recurse on this child
-        direntv6_print_tree(u, inode_nr, new_prefix);
+        error = direntv6_print_tree(u, inode_nr, new_prefix);
+        if(error < 0) {
+            return error;
+        }
     }
 
-    return 0;
+    return error; //==0 if current dir finished
 }
 
 /**
@@ -136,15 +140,15 @@ int direntv6_dirlookup_core(const struct unix_filesystem *u, uint16_t inr,
         const char *entry) {
 
     const char* current = entry;
-    const char* next = strchr(entry, '/');
+    const char* next = strchr(entry, PATH_TOKEN);
 
     // strip multiples '/'
     while (next != NULL && (next - current <= 1)) {
         current += 1;
-        next = strchr(current, '/');
+        next = strchr(current, PATH_TOKEN);
     }
 
-    if (current[0] == '\0' || (current[0] == '/' && current[1] == '\0')) {
+    if (current[0] == '\0' || (current[0] == PATH_TOKEN && current[1] == '\0')) {
         return inr; // empty path return current inr
     }
 
@@ -216,17 +220,13 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     M_REQUIRE_NON_NULL(u);
     M_REQUIRE_NON_NULL(entry);
 
-    if (direntv6_dirlookup(u, 1, entry) > 0) {
-        return ERR_FILENAME_ALREADY_EXISTS;
-    }
-
-    if (entry[0] != '/') {
+    if (entry[0] != PATH_TOKEN) {
         // path must start with a slash !
         return ERR_BAD_PARAMETER;
     }
 
     if (strlen(entry) > MAXPATHLEN_UV6) {
-        // path must start with a slash !
+        // path too long !
         return ERR_FILENAME_TOO_LONG;
     }
 
@@ -235,14 +235,14 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
     char filename[DIRENT_MAXLEN + 1];
     memset(filename, 0, DIRENT_MAXLEN + 1);
 
-    char* last_slash = strrchr(entry, '/');
+    char* last_slash = strrchr(entry, PATH_TOKEN);
     if (strlen(last_slash) == 1) {
         // entry could not end with a slash !
         return ERR_BAD_PARAMETER;
     }
 
     strncpy(path, entry, (size_t) (last_slash - entry + 1));
-    int parent_dir_inr = direntv6_dirlookup(u, 1, path);
+    int parent_dir_inr = direntv6_dirlookup(u, ROOT_INUMBER, path);
     if (parent_dir_inr < 0) {
         // the parent directory doesn't exists !
         return ERR_BAD_PARAMETER;
@@ -257,6 +257,11 @@ int direntv6_create(struct unix_filesystem *u, const char *entry, uint16_t mode)
 
     debug_print("path: %s\n", path);
     debug_print("filename: %s\n", filename);
+
+    if (direntv6_dirlookup(u, (uint16_t) parent_dir_inr, filename) > 0) {
+        // the directory/file allready exist !
+        return ERR_FILENAME_ALREADY_EXISTS;
+    }
 
     // create the file inode
     struct filev6 file;
