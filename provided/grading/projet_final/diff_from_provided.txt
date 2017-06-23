@@ -1,0 +1,102 @@
+unixv6fs.h:
+19d18
+<  * @author original UNIX v6 team + Mendel Rosenblum (Stanford) + Edouard Bugnion
+202,204c201,209
+<     /* TODO WEEK 04:
+<      * la première chose à faire est de définir cette structure.
+<      */
+---
+> 	uint16_t i_mode;
+> 	uint8_t i_nlink;
+> 	uint8_t i_uid;
+> 	uint8_t i_gid;
+> 	uint8_t i_size0;
+> 	uint16_t i_size1;
+> 	uint16_t i_addr[ADDR_SMALL_LENGTH];
+> 	uint16_t i_atime[2];
+> 	uint16_t i_mtime[2];
+
+
+mount.h:
+7d6
+<  * @author Edouard Bugnion
+
+
+error.h:
+7d6
+<  * @author Edouard Bugnion
+
+
+inode.h:
+7d6
+<  * @author Edouard Bugnion
+
+
+sha.h:
+7d6
+<  * @author Aurélien Soccard
+31c30,31
+< void print_sha_inode(struct unix_filesystem *u, struct inode inode, int inr);
+---
+> //FIXME inode should be a const struct inode*
+> void print_sha_inode(const struct unix_filesystem *u, struct inode inode, int inr);
+
+
+test-core.c:
+5d4
+<  * @author Aurélien Soccard & Jean-Cédric Chappelier
+
+
+filev6.h:
+7d6
+<  * @author Edouard Bugnion
+54c53
+<  * @param mode the mode of the file
+---
+>  * @param mode the new offset of the file
+
+
+sector.h:
+7d6
+<  * @author Edouard Bugnion
+
+
+error.c:
+5a6,8
+> /**
+>  * Texts of error messages
+>  */
+
+
+direntv6.h:
+7d6
+<  * @author Edouard Bugnion
+20,22c19,20
+< struct directory_reader {
+<     /* TODO WEEK 06:
+<      * définir cette structure.
+---
+> /**
+>  * Helper struct for reading a directory
+24c22,26
+<     int unused; // so that it can compile before WEEK 6
+---
+> struct directory_reader {
+>     struct filev6 fv6; // the filesystem
+>     struct direntv6 dirs[DIRENTRIES_PER_SECTOR]; //the current dir contents chunk
+>     uint32_t cur; // the current file/dir
+>     uint32_t last; // the last file in the chunk
+
+
+bmblock.h:
+7d6
+<  * @author Edouard Bugnion
+19c18,22
+<     int unused; // so that it can compile before WEEK 9
+---
+>     size_t length; // size in words
+>     uint64_t cursor; // index of the first not full word
+>     uint64_t min; // index of the first bit (included)
+>     uint64_t max;// index of the last bit (included)
+>     uint64_t bm[1]; // array containing bits
+
